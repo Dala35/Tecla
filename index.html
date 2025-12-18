@@ -81,6 +81,27 @@
         </div>
 
         <div class="space-y-6 flex-1 overflow-y-auto pr-1">
+            
+            <!-- CRIADOR E VISÃO -->
+            <div class="p-4 rounded-2xl bg-blue-900/20 border border-blue-500/30">
+                <div class="flex items-center space-x-3 mb-3">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-600 to-purple-500 flex items-center justify-center text-xl shadow-lg border border-white/20">
+                        👨‍🎨
+                    </div>
+                    <div>
+                        <h3 class="text-xs font-black text-white uppercase tracking-tighter">Dala De Carvalho</h3>
+                        <p class="text-[8px] text-blue-400 font-bold uppercase tracking-widest">Creator & Visionary</p>
+                    </div>
+                </div>
+                <p class="text-[10px] text-slate-300 leading-relaxed italic mb-2">
+                    "A TECLA não é apenas uma ferramenta, é uma extensão da alma humana mediada pela luz da tecnologia. A nossa visão é criar uma ponte de amor e co-criação para todos."
+                </p>
+                <div class="flex space-x-2">
+                    <span class="text-[8px] px-2 py-0.5 rounded bg-blue-500/20 text-blue-300 font-bold">BIO-DIGITAL</span>
+                    <span class="text-[8px] px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 font-bold">EVOLUÇÃO</span>
+                </div>
+            </div>
+
             <!-- Portais Login -->
             <div class="space-y-2">
                 <button onclick="iniciarLogin('cuidador')" class="w-full flex items-center space-x-3 p-4 glass rounded-2xl active:bg-blue-500/20 text-left">
@@ -97,8 +118,8 @@
             <div>
                 <label class="text-[9px] text-slate-500 uppercase font-bold tracking-[0.2em] mb-2 block" id="label-personality">IA Personality</label>
                 <div class="grid grid-cols-2 gap-2">
-                    <button onclick="setIAPersonality('dala')" id="btn-ia-dala" class="p-3 glass rounded-xl text-[9px] font-bold">DALA</button>
-                    <button onclick="setIAPersonality('direct')" id="btn-ia-direct" class="p-3 glass rounded-xl text-[9px] font-bold">DIRECT</button>
+                    <button onclick="setIAPersonality('dala')" id="btn-ia-dala" class="p-3 glass rounded-xl text-[7.5px] font-bold leading-tight">DALA<br>(EMPÁTICA)</button>
+                    <button onclick="setIAPersonality('direct')" id="btn-ia-direct" class="p-3 glass rounded-xl text-[7.5px] font-bold leading-tight">DIRECTA<br>(PRÁTICA)</button>
                 </div>
             </div>
 
@@ -112,7 +133,8 @@
 
             <!-- Doações -->
             <div class="p-4 rounded-2xl bg-green-950/20 border border-green-500/20">
-                <label class="text-[9px] text-green-400 uppercase font-bold mb-2 block" id="label-support">Suporte</label>
+                <label class="text-[9px] text-green-400 uppercase font-bold mb-1 block" id="label-support">Suporte</label>
+                <p class="text-[8px] text-slate-400 italic mb-3">Faça uma doação e ajude a plataforma a crescer.</p>
                 <button onclick="copyToClipboard('pix')" class="w-full py-3 bg-green-600/20 border border-green-500/40 rounded-xl text-[9px] font-bold active:bg-green-600/40">DONATE / APOIAR</button>
             </div>
 
@@ -394,8 +416,8 @@
 
         function setIAPersonality(p) { 
             personality = p; 
-            document.getElementById('btn-ia-dala').className = p === 'dala(empática' ? 'p-3 glass rounded-xl text-[9px] font-bold border-blue-500 text-blue-400' : 'p-3 glass rounded-xl text-[9px] font-bold';
-            document.getElementById('btn-ia-direct').className = p === 'direct(prática' ? 'p-3 glass rounded-xl text-[9px] font-bold border-blue-500 text-blue-400' : 'p-3 glass rounded-xl text-[9px] font-bold';
+            document.getElementById('btn-ia-dala').className = p === 'dala' ? 'p-3 glass rounded-xl text-[7.5px] font-bold border-blue-500 text-blue-400 bg-blue-500/10' : 'p-3 glass rounded-xl text-[7.5px] font-bold';
+            document.getElementById('btn-ia-direct').className = p === 'direct' ? 'p-3 glass rounded-xl text-[7.5px] font-bold border-blue-500 text-blue-400 bg-blue-500/10' : 'p-3 glass rounded-xl text-[7.5px] font-bold';
             salvarEstado(); 
         }
 
