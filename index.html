@@ -222,6 +222,7 @@
                 personality: "Personalidade IA",
                 support: "Doações",
                 analisando: "Dala está a analisar...",
+                welcome: "Bem-vindo de volta",
                 pictogramas: [
                     { t: 'Comer', icon: '🍽️' }, { t: 'Banheiro', icon: '🚻' },
                     { t: 'Feliz', icon: '😊' }, { t: 'Triste', icon: '😢' },
@@ -238,6 +239,7 @@
                 personality: "AI Personality",
                 support: "Donations",
                 analisando: "Dala is analyzing...",
+                welcome: "Welcome back",
                 pictogramas: [
                     { t: 'Eat', icon: '🍽️' }, { t: 'Bathroom', icon: '🚻' },
                     { t: 'Happy', icon: '😊' }, { t: 'Sad', icon: '😢' },
@@ -254,6 +256,7 @@
                 personality: "Personnalité IA",
                 support: "Dons",
                 analisando: "Dala analyse...",
+                welcome: "Bon retour",
                 pictogramas: [
                     { t: 'Manger', icon: '🍽️' }, { t: 'Toilettes', icon: '🚻' },
                     { t: 'Heureux', icon: '😊' }, { t: 'Triste', icon: '😢' },
@@ -334,6 +337,26 @@
             carregarEstado();
             mudarIdioma(currentLang);
             renderizarModo();
+            boasVindasTrilingue();
+        }
+
+        function boasVindasTrilingue() {
+            const msgs = [
+                { t: i18n['pt-PT'].welcome, l: 'pt-PT' },
+                { t: i18n['en-US'].welcome, l: 'en-US' },
+                { t: i18n['fr-FR'].welcome, l: 'fr-FR' }
+            ];
+            
+            let delay = 0;
+            msgs.forEach(m => {
+                setTimeout(() => {
+                    const utter = new SpeechSynthesisUtterance(m.t);
+                    utter.lang = m.l;
+                    speechSynth.speak(utter);
+                    showToast(m.t);
+                }, delay);
+                delay += 1800; // Espaçamento entre saudações
+            });
         }
 
         function initSpeech() {
