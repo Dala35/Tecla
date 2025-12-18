@@ -114,7 +114,7 @@
                 </button>
             </div>
 
-            <!-- Personality -->
+            <!-- Personalidade IA -->
             <div>
                 <label class="text-[9px] text-slate-500 uppercase font-bold tracking-[0.2em] mb-2 block" id="label-personality">IA Personality</label>
                 <div class="grid grid-cols-2 gap-2">
@@ -131,7 +131,7 @@
                 </div>
             </div>
 
-            <!-- Doações -->
+            <!-- Doações / Suporte -->
             <div class="p-4 rounded-2xl bg-green-950/20 border border-green-500/20">
                 <label class="text-[9px] text-green-400 uppercase font-bold mb-1 block" id="label-support">Suporte</label>
                 <p class="text-[8px] text-slate-400 italic mb-3">Faça uma doação e ajude a plataforma a crescer.</p>
@@ -167,12 +167,12 @@
             </div>
         </header>
 
-        <main id="mainContainer" class="p-4 user-mode overflow-hidden">
+        <main id="mainContainer" class="p-4 user-mode overflow-hidden h-full">
             <!-- Technical Mode Section -->
             <section id="dashboardSection" class="hidden mb-4 space-y-4 animate-fade-in overflow-y-auto max-h-[50vh] p-1">
                 <div class="glass p-4 rounded-2xl">
                     <h3 class="text-blue-300 font-bold mb-3 text-[9px] tracking-widest uppercase">API Engine</h3>
-                    <input type="password" id="api_key_input" placeholder="Gemini API Key" class="w-full bg-black/40 border border-slate-700 rounded-xl p-3 text-[10px] outline-none mb-2">
+                    <input type="password" id="api_key_input" placeholder="Gemini API Key" class="w-full bg-black/40 border border-slate-700 rounded-xl p-3 text-[10px] outline-none mb-2 text-white">
                     <button onclick="salvarEstado()" class="w-full py-3 bg-blue-600/20 border border-blue-500/40 rounded-xl text-[9px] font-black">SAVE CONFIG</button>
                 </div>
                 <div class="glass p-4 rounded-2xl h-[120px]"><canvas id="graficoAlertas"></canvas></div>
@@ -260,7 +260,7 @@
                 pictogramas: [
                     { t: 'Manger', icon: '🍽️' }, { t: 'Toilettes', icon: '🚻' },
                     { t: 'Heureux', icon: '😊' }, { t: 'Triste', icon: '😢' },
-                    { t: 'Douleur', icon: '🤕' }, { t: 'Aide', icon: '🆘' }
+                    { t: 'Douleur', icon: 'Douleur' }, { t: 'Aide', icon: '🆘' }
                 ]
             }
         };
@@ -286,10 +286,9 @@
             document.getElementById('label-personality').innerText = content.personality;
             document.getElementById('label-support').innerText = content.support;
 
-            // Update UI Active Language
             ['pt', 'en', 'fr'].forEach(l => {
                 const btn = document.getElementById(`lang-${l}`);
-                btn.className = lang.startsWith(l) ? "px-2 py-1 text-[10px] rounded-lg bg-blue-600 text-white" : "px-2 py-1 text-[10px] rounded-lg";
+                if (btn) btn.className = lang.startsWith(l) ? "px-2 py-1 text-[10px] rounded-lg bg-blue-600 text-white" : "px-2 py-1 text-[10px] rounded-lg";
             });
 
             if (recognition) recognition.lang = lang;
@@ -333,6 +332,12 @@
         function enableVoiceAndStartApp() {
             document.getElementById('voiceGate').classList.add('hidden');
             document.getElementById('mainContentWrapper').classList.remove('hidden');
+            
+            // Futuro: Detetar idioma do navegador automaticamente
+            // const browserLang = navigator.language || navigator.userLanguage;
+            // if (browserLang.startsWith('en')) currentLang = 'en-US';
+            // else if (browserLang.startsWith('fr')) currentLang = 'fr-FR';
+
             initSpeech();
             carregarEstado();
             mudarIdioma(currentLang);
@@ -355,7 +360,7 @@
                     speechSynth.speak(utter);
                     showToast(m.t);
                 }, delay);
-                delay += 1800; // Espaçamento entre saudações
+                delay += 1800; 
             });
         }
 
@@ -406,15 +411,15 @@
             itxt.innerHTML = `${i18n[currentLang].analisando} <span class="loading-dot">.</span>`;
 
             try {
-                const prompt = personality === 'dala' ? "Be empathetic and brief." : "Be direct.";
+                const prompt = personality === 'dala' ? "Seja empática e breve." : "Seja direta e prática.";
                 const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${userApiKey}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ contents: [{ parts: [{ text: `${prompt} Lang: ${currentLang}. Input: ${txt}` }] }] })
+                    body: JSON.stringify({ contents: [{ parts: [{ text: `${prompt} Lang: ${currentLang}. User input: ${txt}` }] }] })
                 });
                 const data = await res.json();
                 itxt.innerText = data.candidates[0].content.parts[0].text;
-            } catch (e) { itxt.innerText = "Offline."; }
+            } catch (e) { itxt.innerText = "Modo Offline."; }
         }
 
         function adicionarMensagem(txt, tipo, id) {
@@ -425,7 +430,8 @@
             div.innerText = txt;
             chat.appendChild(div);
             chat.scrollTop = chat.scrollHeight;
-            document.getElementById('saida').style.display = 'none';
+            const saida = document.getElementById('saida');
+            if (saida) saida.style.display = 'none';
         }
 
         function toggleModo() { modo = (modo === 'user' ? 'technical' : 'user'); renderizarModo(); salvarEstado(); }
@@ -445,7 +451,8 @@
         }
 
         function salvarEstado() {
-            const key = document.getElementById('api_key_input').value;
+            const keyInput = document.getElementById('api_key_input');
+            const key = keyInput ? keyInput.value : '';
             userApiKey = key;
             localStorage.setItem('tecla_save', JSON.stringify({ lang: currentLang, mode: modo, pers: personality, key: key }));
         }
@@ -455,7 +462,11 @@
             if (s.lang) mudarIdioma(s.lang);
             if (s.mode) modo = s.mode;
             if (s.pers) setIAPersonality(s.pers);
-            if (s.key) { userApiKey = s.key; document.getElementById('api_key_input').value = s.key; }
+            if (s.key) { 
+                userApiKey = s.key; 
+                const keyInput = document.getElementById('api_key_input');
+                if (keyInput) keyInput.value = s.key; 
+            }
         }
     </script>
 </body>
