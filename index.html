@@ -64,6 +64,17 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         .active { border-bottom: 2px solid #3b82f6; color: #3b82f6; }
+        
+        .mic-active {
+            animation: pulse-red 1.5s infinite;
+            color: #ef4444 !important;
+        }
+
+        @keyframes pulse-red {
+            0% { transform: scale(1); shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { transform: scale(1.1); shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+            100% { transform: scale(1); shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
     </style>
 </head>
 <body class="min-h-screen">
@@ -104,12 +115,24 @@
 
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div class="glass p-6 rounded-2xl lg:col-span-1">
-                        <h3 class="text-blue-300 font-bold mb-4 uppercase text-[10px] tracking-[0.2em]">Cérebro LLM (Gemini)</h3>
+                        <h3 class="text-blue-300 font-bold mb-4 uppercase text-[10px] tracking-[0.2em]">Cérebro LLM (Universal API)</h3>
                         <div id="api_status" class="mb-4 text-xs font-mono"></div>
-                        <input type="password" id="api_key_input" placeholder="API Key..." 
-                               class="w-full bg-black/40 border border-slate-700 rounded-xl p-3 text-xs focus:border-blue-500 outline-none transition-all font-mono">
+                        
+                        <div class="space-y-3">
+                            <div>
+                                <label class="text-[9px] text-slate-500 uppercase ml-1">Endpoint URL</label>
+                                <input type="text" id="api_endpoint_input" placeholder="https://api.provider.com/v1/..." 
+                                       class="w-full bg-black/40 border border-slate-700 rounded-xl p-3 text-xs focus:border-blue-500 outline-none transition-all font-mono">
+                            </div>
+                            <div>
+                                <label class="text-[9px] text-slate-500 uppercase ml-1">API Key / Token</label>
+                                <input type="password" id="api_key_input" placeholder="sk-..." 
+                                       class="w-full bg-black/40 border border-slate-700 rounded-xl p-3 text-xs focus:border-blue-500 outline-none transition-all font-mono">
+                            </div>
+                        </div>
+
                         <button onclick="salvarEstado()" class="mt-4 w-full py-2.5 bg-blue-600/20 hover:bg-blue-600/40 border border-blue-500/40 rounded-xl text-[10px] font-black tracking-widest transition-all">
-                            GRAVAR / SAVE
+                            GRAVAR CONFIGS / SAVE
                         </button>
                     </div>
 
@@ -154,7 +177,7 @@
                     </div>
                 </div>
 
-                <!-- Pictogramas de Acessibilidade (Tradução via JS) -->
+                <!-- Pictogramas de Acessibilidade -->
                 <div id="pictogramasGrid" class="grid grid-cols-3 md:grid-cols-6 gap-3 mb-6">
                     <!-- Gerado dinamicamente -->
                 </div>
@@ -173,8 +196,16 @@
                                placeholder="..." 
                                class="flex-1 bg-transparent border-none px-6 py-4 focus:outline-none text-white text-lg font-light">
                         <div class="flex items-center space-x-1 px-2">
-                            <button onclick="falar()" class="p-3 text-slate-400 hover:text-blue-400 transition-all"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" /></svg></button>
-                            <button onclick="responder()" class="p-4 bg-blue-600 text-white rounded-full hover:bg-blue-500 transition-all shadow-lg active:scale-95"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M13 5l7 7-7 7M5 5l7 7-7 7" /></svg></button>
+                            <button id="micBtn" onclick="falar()" class="p-3 text-slate-400 hover:text-blue-400 transition-all">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                                </svg>
+                            </button>
+                            <button onclick="responder()" class="p-4 bg-blue-600 text-white rounded-full hover:bg-blue-500 transition-all shadow-lg active:scale-95">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+                                </svg>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -191,6 +222,7 @@
                 registo: 'Tecla registou: "{entrada}".',
                 respiracao: ["Inspire...", "Segure...", "Expire..."],
                 dalaAnalisando: 'Dala a analisar...',
+                ouvinteIniciado: 'Ouvindo...',
                 pictogramas: [
                     { t: 'Quero comer', label: 'Comer', icon: '🍽️' },
                     { t: 'Preciso ir ao banheiro', label: 'Banheiro', icon: '🚻' },
@@ -207,6 +239,7 @@
                 registo: 'Tecla noted: "{entrada}".',
                 respiracao: ["Inhale...", "Hold...", "Exhale..."],
                 dalaAnalisando: 'Dala analyzing...',
+                ouvinteIniciado: 'Listening...',
                 pictogramas: [
                     { t: 'I want to eat', label: 'Eat', icon: '🍽️' },
                     { t: 'I need the bathroom', label: 'Bathroom', icon: '🚻' },
@@ -220,9 +253,9 @@
 
         const MAX_LOGS = 50;
         const ALERTAS_NECESSARIOS_PARA_VOZ = 3;
-        const apiUrlBase = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=";
-
+        
         let userProvidedApiKey = '';
+        let userProvidedEndpoint = '';
         let dadosLogs = [];
         let versaoAtual = 'premium';
         let modoAtual = 'user';
@@ -230,6 +263,33 @@
         let chart = null;
         let speechSynth = window.speechSynthesis;
         let speechVoices = [];
+        let recognition = null;
+
+        // Inicialização do Reconhecimento de Voz
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = false;
+
+            recognition.onstart = () => {
+                document.getElementById('micBtn').classList.add('mic-active');
+            };
+
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                document.getElementById('entrada').value = transcript;
+                responder();
+            };
+
+            recognition.onerror = () => {
+                document.getElementById('micBtn').classList.remove('mic-active');
+            };
+
+            recognition.onend = () => {
+                document.getElementById('micBtn').classList.remove('mic-active');
+            };
+        }
 
         function initSpeechSynthesis() {
             const loadVoices = () => { speechVoices = speechSynth.getVoices(); };
@@ -255,6 +315,8 @@
             document.getElementById('saida').innerText = content.saida;
             document.getElementById('entrada').placeholder = content.placeholder;
             
+            if (recognition) recognition.lang = lang;
+
             const grid = document.getElementById('pictogramasGrid');
             grid.innerHTML = '';
             content.pictogramas.forEach(p => {
@@ -274,6 +336,19 @@
             const voice = speechVoices.find(v => v.lang.startsWith(idioma.split('-')[0]));
             if (voice) utter.voice = voice;
             speechSynth.speak(utter);
+        }
+
+        // FUNÇÃO CORRIGIDA: Inicia a escuta de voz
+        function falar() {
+            if (!recognition) {
+                console.error("Reconhecimento de voz não suportado neste navegador.");
+                return;
+            }
+            try {
+                recognition.start();
+            } catch (e) {
+                recognition.stop();
+            }
         }
 
         function usarFrase(frase) {
@@ -311,30 +386,42 @@
 
         async function generateDalaInsight(entrada) {
             const key = userProvidedApiKey;
+            const endpoint = userProvidedEndpoint || "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=" + key;
             const lang = document.getElementById("idioma").value;
             const insightDiv = document.getElementById('orientacaoDala');
             const insightText = document.getElementById('dala-insight-text');
             insightDiv.classList.remove('hidden');
 
             if (!key) {
-                insightText.innerHTML = `<span class="text-red-400 text-xs">${lang === 'pt-PT' ? 'Aguardando chave Gemini.' : 'Waiting for Gemini Key.'}</span>`;
+                insightText.innerHTML = `<span class="text-red-400 text-xs">${lang === 'pt-PT' ? 'Aguardando configuração de API.' : 'Waiting for API configuration.'}</span>`;
                 return;
             }
 
             insightText.innerHTML = `${i18n[lang].dalaAnalisando} <span class="loading-dot">.</span><span class="loading-dot">.</span><span class="loading-dot">.</span>`;
+            
             try {
-                const response = await fetch(apiUrlBase + key, {
+                const payload = {
+                    contents: [{ parts: [{ text: `O utilizador disse: "${entrada}". Responda com uma orientação curta e amorosa em ${lang}.` }] }],
+                    systemInstruction: { parts: [{ text: "Age como Dala, uma guia protetora e empática de uma plataforma de comunicação assistiva. Máximo 2 frases." }] }
+                };
+
+                const response = await fetch(endpoint, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: `User said: "${entrada}". Provide a short guidance in ${lang}.` }] }],
-                        systemInstruction: { parts: [{ text: "Act as Dala, protective guide. Max 2 short practical sentences." }] }
-                    })
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${key}` 
+                    },
+                    body: JSON.stringify(payload)
                 });
+                
                 const result = await response.json();
-                insightText.textContent = result.candidates?.[0]?.content?.parts?.[0]?.text || "...";
+                let textResult = "...";
+                if (result.candidates) textResult = result.candidates[0].content.parts[0].text;
+                else if (result.choices) textResult = result.choices[0].message.content;
+
+                insightText.textContent = textResult;
             } catch (e) {
-                insightText.textContent = "Dala connection pause.";
+                insightText.textContent = "Conexão Dala pausada. Verifique o endpoint.";
             }
         }
 
@@ -421,22 +508,31 @@
             localStorage.setItem('tecla_logs', JSON.stringify(dadosLogs));
             localStorage.setItem('tecla_versao', versaoAtual);
             localStorage.setItem('tecla_modo', modoAtual);
-            if (document.getElementById('api_key_input')) {
-                userProvidedApiKey = document.getElementById('api_key_input').value;
+            
+            const keyIn = document.getElementById('api_key_input');
+            const endIn = document.getElementById('api_endpoint_input');
+            
+            if (keyIn && endIn) {
+                userProvidedApiKey = keyIn.value;
+                userProvidedEndpoint = endIn.value;
                 localStorage.setItem('tecla_api_key', userProvidedApiKey);
+                localStorage.setItem('tecla_api_endpoint', userProvidedEndpoint);
             }
         }
 
         function carregarEstado() {
             const l = localStorage.getItem('tecla_logs');
             const k = localStorage.getItem('tecla_api_key');
+            const e = localStorage.getItem('tecla_api_endpoint');
+            
             if (l) dadosLogs = JSON.parse(l);
             if (k) { userProvidedApiKey = k; document.getElementById('api_key_input').value = k; }
+            if (e) { userProvidedEndpoint = e; document.getElementById('api_endpoint_input').value = e; }
         }
 
         function checkApiStatus() {
             const s = document.getElementById('api_status');
-            s.innerText = userProvidedApiKey ? "SISTEMA ONLINE" : "AGUARDANDO CHAVE";
+            s.innerText = userProvidedApiKey ? "SISTEMA ONLINE" : "AGUARDANDO CONFIGURAÇÃO";
             s.className = userProvidedApiKey ? "text-green-400 text-xs" : "text-yellow-400 text-xs";
         }
 
