@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Tecla - Plataforma de Conexão</title>
+    <title>Tecla - Plataforma de Conexão Inteligente</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -24,20 +24,22 @@
         }
 
         .glass { 
-            background: rgba(15, 23, 42, 0.8); 
+            background: rgba(15, 23, 42, 0.85); 
             backdrop-filter: blur(20px); 
             -webkit-backdrop-filter: blur(20px); 
             border: 1px solid rgba(255, 255, 255, 0.08); 
         }
 
+        /* Otimização de Animação */
         #sideMenu {
-            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
             transform: translateX(100%);
+            will-change: transform;
         }
         #sideMenu.open { transform: translateX(0); }
 
-        .message-anim { animation: slideUp 0.3s ease-out forwards; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .message-anim { animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
         .pb-safe { padding-bottom: env(safe-area-inset-bottom, 20px); }
 
@@ -47,51 +49,59 @@
         }
         @keyframes pulse-red {
             0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
-            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+            70% { box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
             100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
         }
+        
+        /* Scrollbar oculta mas funcional */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
     </style>
 </head>
 <body class="fixed inset-0 flex flex-col">
 
     <!-- Gate de Entrada -->
-    <div id="voiceGate" class="fixed inset-0 z-[200] flex items-center justify-center bg-slate-950 p-6">
-        <div class="p-10 glass rounded-[3rem] max-w-sm text-center shadow-2xl">
-            <h1 class="text-5xl font-extrabold mb-2 bg-gradient-to-b from-white to-blue-500 bg-clip-text text-transparent italic tracking-tighter">TECLA</h1>
-            <p id="gateSubtitle" class="mb-8 text-slate-500 text-[10px] font-black uppercase tracking-[0.3em]">Conexão Humana & IA</p>
-            
-            <div class="space-y-3 mb-8">
-                <button onclick="showLogin('usuario')" id="btnUserLogin" class="w-full py-4 bg-blue-600 rounded-2xl font-black text-xs tracking-widest hover:bg-blue-500 transition-all">ENTRAR COMO USUÁRIO</button>
-                <button onclick="showLogin('cuidador')" id="btnCareLogin" class="w-full py-4 glass rounded-2xl font-black text-xs tracking-widest hover:bg-white/5 transition-all">ENTRAR COMO CUIDADOR</button>
+    <div id="voiceGate" class="fixed inset-0 z-[200] flex items-center justify-center bg-slate-950 p-6 transition-opacity duration-500">
+        <div class="p-10 glass rounded-[3rem] max-w-sm text-center shadow-2xl relative overflow-hidden">
+            <div class="absolute inset-0 bg-blue-600/10 blur-3xl rounded-full scale-150 animate-pulse"></div>
+            <div class="relative z-10">
+                <h1 class="text-6xl font-extrabold mb-2 bg-gradient-to-b from-white to-blue-500 bg-clip-text text-transparent italic tracking-tighter">TECLA</h1>
+                <p id="gateSubtitle" class="mb-8 text-slate-400 text-[10px] font-black uppercase tracking-[0.3em]">Conexão Humana & IA</p>
+                
+                <div class="space-y-3 mb-8">
+                    <button onclick="showLogin('usuario')" id="btnUserLogin" class="w-full py-4 bg-blue-600 rounded-2xl font-black text-xs tracking-widest hover:bg-blue-500 transition-all shadow-lg shadow-blue-900/50">ENTRAR COMO USUÁRIO</button>
+                    <button onclick="showLogin('cuidador')" id="btnCareLogin" class="w-full py-4 glass rounded-2xl font-black text-xs tracking-widest hover:bg-white/5 transition-all">ENTRAR COMO CUIDADOR</button>
+                </div>
+                <p id="gateQuote" class="text-[9px] text-slate-600 italic">"Nenhuma voz deve ser silenciada."</p>
             </div>
-            <p id="gateQuote" class="text-[9px] text-slate-600 italic">"Nenhuma voz deve ser silenciada."</p>
         </div>
     </div>
 
     <!-- Modal de Login -->
-    <div id="loginModal" class="fixed inset-0 z-[210] glass flex items-center justify-center hidden p-6">
-        <div class="p-8 bg-slate-900 rounded-[2.5rem] w-full max-w-xs border border-white/10">
+    <div id="loginModal" class="fixed inset-0 z-[210] glass flex items-center justify-center hidden p-6 backdrop-blur-xl">
+        <div class="p-8 bg-slate-900/95 rounded-[2.5rem] w-full max-w-xs border border-white/10 shadow-2xl">
             <h2 id="loginTitle" class="text-xl font-black mb-6 uppercase tracking-tighter text-white italic">Login</h2>
-            <input type="email" id="loginEmail" placeholder="Email" class="w-full p-4 bg-slate-950 rounded-xl mb-3 text-sm outline-none border border-white/5 text-white">
-            <input type="password" id="loginPass" placeholder="Palavra-passe" class="w-full p-4 bg-slate-950 rounded-xl mb-6 text-sm outline-none border border-white/5 text-white">
-            <button onclick="enableVoiceAndStartApp()" id="btnLoginAction" class="w-full py-4 bg-blue-600 rounded-xl font-black text-xs uppercase">Acessar Portal</button>
-            <button onclick="hideLogin()" id="btnCancelLogin" class="w-full py-3 mt-2 text-slate-500 text-[10px] font-bold uppercase tracking-widest">Cancelar</button>
+            <input type="email" id="loginEmail" placeholder="Email" class="w-full p-4 bg-slate-950 rounded-xl mb-3 text-sm outline-none border border-white/5 text-white focus:border-blue-500 transition-colors">
+            <input type="password" id="loginPass" placeholder="Palavra-passe" class="w-full p-4 bg-slate-950 rounded-xl mb-6 text-sm outline-none border border-white/5 text-white focus:border-blue-500 transition-colors">
+            <button onclick="enableVoiceAndStartApp()" id="btnLoginAction" class="w-full py-4 bg-blue-600 rounded-xl font-black text-xs uppercase hover:bg-blue-500 transition-colors">Acessar Portal</button>
+            <button onclick="hideLogin()" id="btnCancelLogin" class="w-full py-3 mt-2 text-slate-500 text-[10px] font-bold uppercase tracking-widest hover:text-white transition-colors">Cancelar</button>
         </div>
     </div>
 
     <!-- Menu Lateral -->
-    <div id="menuOverlay" onclick="toggleMenu()" class="fixed inset-0 bg-black/90 z-[100] hidden"></div>
-    <aside id="sideMenu" class="fixed top-0 right-0 h-full glass z-[110] w-[85%] max-w-[320px] p-8 flex flex-col overflow-y-auto">
+    <div id="menuOverlay" onclick="toggleMenu()" class="fixed inset-0 bg-black/80 z-[100] hidden backdrop-blur-sm transition-all"></div>
+    <aside id="sideMenu" class="fixed top-0 right-0 h-full glass z-[110] w-[85%] max-w-[320px] p-8 flex flex-col overflow-y-auto border-l border-white/10 shadow-2xl">
         <div class="flex justify-between items-center mb-10">
             <span id="menuLabel" class="text-[10px] font-black tracking-widest text-blue-500 uppercase">Governança e Configurações</span>
-            <button onclick="toggleMenu()" class="p-2 text-white">✕</button>
+            <button onclick="toggleMenu()" class="p-2 text-white hover:text-blue-400 transition-colors">✕</button>
         </div>
 
         <!-- Mensagem de Governança -->
-        <div class="mb-8 p-6 rounded-[2rem] bg-blue-600/10 border border-blue-500/20">
+        <div class="mb-8 p-6 rounded-[2rem] bg-blue-600/5 border border-blue-500/20">
             <h3 id="govTitle" class="text-xs font-black mb-3 uppercase text-blue-400">Sobre a Plataforma</h3>
             <p id="govMessage" class="text-[10px] text-slate-300 leading-relaxed italic">
-                A Tecla é um ecossistema dedicado a devolver a autonomia de comunicação a quem a perdeu. Através de tecnologia assistiva e IA, garantimos que a dignidade humana e a expressão individual sejam preservadas. Este projeto é gerido sob rigorosos princípios de transparência e impacto social.
+                <!-- Conteúdo injetado via JS -->
             </p>
         </div>
 
@@ -99,95 +109,174 @@
         <div class="mb-8">
             <h3 id="langLabel" class="text-[10px] font-black mb-4 uppercase text-slate-500 tracking-widest">Idioma do Sistema</h3>
             <div class="grid grid-cols-2 gap-2">
-                <button onclick="setLanguage('pt-PT')" class="p-3 glass rounded-xl text-[9px] font-bold hover:bg-white/5 text-white">Português</button>
-                <button onclick="setLanguage('en-US')" class="p-3 glass rounded-xl text-[9px] font-bold hover:bg-white/5 text-white">English</button>
-                <button onclick="setLanguage('fr-FR')" class="p-3 glass rounded-xl text-[9px] font-bold hover:bg-white/5 text-white">Français</button>
-                <button onclick="setLanguage('zh-CN')" class="p-3 glass rounded-xl text-[9px] font-bold hover:bg-white/5 text-white">中文 (Mandarim)</button>
+                <button onclick="setLanguage('pt-PT')" class="p-3 glass rounded-xl text-[9px] font-bold hover:bg-blue-600/20 transition-all text-white border border-transparent hover:border-blue-500/30">Português</button>
+                <button onclick="setLanguage('en-US')" class="p-3 glass rounded-xl text-[9px] font-bold hover:bg-blue-600/20 transition-all text-white border border-transparent hover:border-blue-500/30">English</button>
+                <button onclick="setLanguage('fr-FR')" class="p-3 glass rounded-xl text-[9px] font-bold hover:bg-blue-600/20 transition-all text-white border border-transparent hover:border-blue-500/30">Français</button>
+                <button onclick="setLanguage('zh-CN')" class="p-3 glass rounded-xl text-[9px] font-bold hover:bg-blue-600/20 transition-all text-white border border-transparent hover:border-blue-500/30">中文</button>
             </div>
         </div>
 
         <!-- Doação -->
-        <div class="mb-8 p-6 rounded-[2rem] bg-gradient-to-br from-pink-600/20 to-transparent border border-pink-500/20">
+        <div class="mb-8 p-6 rounded-[2rem] bg-gradient-to-br from-pink-600/10 to-transparent border border-pink-500/20">
             <h3 id="donateLabel" class="text-xs font-black mb-2 uppercase text-white">Apoie a Tecla 💝</h3>
-            <p id="donateText" class="text-[10px] text-slate-400 leading-relaxed mb-4">Sua doação ajuda a expandir nossa IA e manter a plataforma gratuita para quem mais precisa.</p>
+            <p id="donateText" class="text-[10px] text-slate-400 leading-relaxed mb-4">Sua doação ajuda a expandir nossa IA e manter a plataforma gratuita.</p>
             <div class="space-y-2">
                 <form action="https://www.paypal.com/donate" method="post" target="_blank">
                     <input type="hidden" name="business" value="dalla.decarvalho@gmail.com" />
-                    <button type="submit" class="block w-full py-3 bg-white/5 hover:bg-blue-600/20 text-center rounded-xl text-[9px] font-black uppercase tracking-widest border border-white/5 text-white transition-all">PAYPAL</button>
+                    <button type="submit" class="block w-full py-3 bg-white/5 hover:bg-pink-600/20 text-center rounded-xl text-[9px] font-black uppercase tracking-widest border border-white/5 text-white transition-all">PAYPAL</button>
                 </form>
-                <a href="https://buy.stripe.com/exemplo" target="_blank" class="block w-full py-3 bg-white/5 hover:bg-blue-600/20 text-center rounded-xl text-[9px] font-black uppercase tracking-widest border border-white/5 text-white transition-all">STRIPE</a>
             </div>
         </div>
 
-        <button onclick="toggleModo(); toggleMenu();" class="w-full p-5 glass rounded-2xl flex justify-between items-center mb-4">
+        <button onclick="toggleModo(); toggleMenu();" class="w-full p-5 glass rounded-2xl flex justify-between items-center mb-4 hover:bg-white/5 transition-all">
             <span id="dashLabel" class="text-[10px] font-black uppercase text-white">Dashboard Cuidador</span>
-            <span id="badgeModo" class="text-[8px] bg-blue-500 px-2 py-1 rounded text-white">USER</span>
+            <span id="badgeModo" class="text-[8px] bg-blue-500 px-2 py-1 rounded text-white shadow-lg shadow-blue-500/30">USER</span>
         </button>
 
         <div class="mt-auto text-center opacity-30 text-[8px] font-black uppercase tracking-[0.5em] text-white">TECLA ECOSYSTEM</div>
     </aside>
 
     <!-- Header -->
-    <header class="p-5 flex justify-between items-center glass z-40 shrink-0">
+    <header class="p-5 flex justify-between items-center glass z-40 shrink-0 border-b border-white/5">
         <div class="flex items-center space-x-3">
             <span class="font-black italic text-xl tracking-tighter text-white">TECLA</span>
-            <div id="aiIndicator" class="flex items-center space-x-1 px-2 py-1 bg-green-500/10 rounded-full">
-                <div class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
-                <span id="aiStatusText" class="text-[7px] font-black text-green-500 uppercase italic">Modo IA Ativo</span>
+            <div id="aiIndicator" class="flex items-center space-x-1 px-3 py-1 bg-green-500/10 rounded-full border border-green-500/20">
+                <div class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse shadow-[0_0_10px_#22c55e]"></div>
+                <span id="aiStatusText" class="text-[7px] font-black text-green-500 uppercase italic tracking-wider">IA Ativa</span>
             </div>
         </div>
-        <button onclick="toggleMenu()" class="p-2 glass rounded-xl text-white text-lg">☰</button>
+        <button onclick="toggleMenu()" class="p-3 glass rounded-xl text-white hover:bg-white/10 transition-all">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        </button>
     </header>
 
     <main class="flex-1 flex flex-col relative overflow-hidden bg-slate-950">
         
         <!-- Dashboard Admin -->
-        <section id="dashboardSection" class="hidden absolute inset-0 z-50 glass p-6 overflow-y-auto">
+        <section id="dashboardSection" class="hidden absolute inset-0 z-50 glass p-6 overflow-y-auto backdrop-blur-3xl">
             <h3 id="dashTitle" class="text-xs font-black mb-6 uppercase tracking-widest text-blue-500 italic">Monitoramento de Atividade</h3>
             
-            <div class="bg-slate-900/50 p-4 rounded-[2rem] border border-white/5 mb-6">
+            <div class="bg-slate-900/50 p-4 rounded-[2rem] border border-white/5 mb-6 shadow-inner">
                 <canvas id="interactionChart" height="200"></canvas>
             </div>
 
             <div class="grid grid-cols-2 gap-4 mb-6">
                 <div class="p-4 glass rounded-2xl text-center">
                     <span id="statLabelTotal" class="text-[8px] font-black text-slate-500 uppercase block mb-1 tracking-widest">Total Hoje</span>
-                    <span id="statTotal" class="text-xl font-black text-white">0</span>
+                    <span id="statTotal" class="text-2xl font-black text-white">0</span>
                 </div>
                 <div class="p-4 glass rounded-2xl text-center">
                     <span id="statLabelMood" class="text-[8px] font-black text-slate-500 uppercase block mb-1 tracking-widest">Humor Médio</span>
-                    <span id="statMood" class="text-xl font-black text-blue-400">Estável</span>
+                    <span id="statMood" class="text-2xl font-black text-blue-400">Estável</span>
                 </div>
             </div>
 
-            <div class="p-4 glass rounded-2xl border-white/5">
+            <div class="p-6 glass rounded-[2rem] border-white/5">
                 <h4 id="aiConfigLabel" class="text-[9px] font-black uppercase text-slate-500 mb-3 tracking-widest">Configurações de IA</h4>
-                <input type="password" id="api_key_input" placeholder="Chave Gemini API" class="w-full p-4 bg-slate-950 rounded-xl mb-3 text-xs outline-none border border-white/5 text-white">
-                <button onclick="salvarEstado()" id="btnSync" class="w-full py-4 bg-blue-600 rounded-xl font-black text-[10px] uppercase italic">Sincronizar Canal</button>
+                <div id="aiInfoText" class="bg-blue-900/20 p-3 rounded-lg mb-4 text-[9px] text-blue-200">
+                    * A IA Local está ativa por padrão. Use a API apenas para modelos externos avançados.
+                </div>
+                <input type="password" id="api_key_input" placeholder="Chave Gemini API (Opcional)" class="w-full p-4 bg-slate-950 rounded-xl mb-3 text-xs outline-none border border-white/5 text-white focus:border-blue-500 transition-colors">
+                <button onclick="salvarEstado()" id="btnSync" class="w-full py-4 bg-blue-600 rounded-xl font-black text-[10px] uppercase italic hover:bg-blue-500 transition-colors">Sincronizar Canal</button>
             </div>
         </section>
 
         <!-- Chat Principal -->
-        <div id="chatDisplay" class="flex-1 overflow-y-auto p-5 space-y-4"></div>
+        <div id="chatDisplay" class="flex-1 overflow-y-auto p-5 space-y-4 scroll-smooth"></div>
 
         <!-- Pictogramas Rápidos -->
-        <div id="pictogramasGrid" class="grid grid-cols-3 gap-2 px-5 pb-3 shrink-0"></div>
+        <div id="pictogramasGrid" class="grid grid-cols-3 gap-3 px-5 pb-3 shrink-0"></div>
 
         <!-- Input -->
         <div class="pb-safe px-5 pb-5 shrink-0">
-            <div class="flex items-center glass rounded-[2.5rem] p-1.5 shadow-2xl space-x-2">
-                <button id="micBtn" onclick="toggleListening()" class="p-4 glass rounded-full hover:bg-white/5 transition-all text-blue-500">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg>
+            <div class="flex items-center glass rounded-[2.5rem] p-2 shadow-2xl space-x-2 border border-white/10">
+                <button id="micBtn" onclick="toggleListening()" class="p-4 glass rounded-full hover:bg-white/10 transition-all text-blue-500 relative overflow-hidden">
+                    <svg class="w-6 h-6 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"/></svg>
                 </button>
-                <input type="text" id="entrada" onkeypress="if(event.key==='Enter') responder()" placeholder="Escreva..." class="flex-1 bg-transparent px-2 py-4 outline-none text-sm font-medium text-white">
-                <button onclick="responder()" class="p-4 bg-blue-600 rounded-full active:scale-90 transition-transform">
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M13 5l7 7-7 7M5 5l7 7-7 7"/></svg>
+                <input type="text" id="entrada" onkeypress="if(event.key==='Enter') responder()" placeholder="Escreva..." class="flex-1 bg-transparent px-2 py-4 outline-none text-base font-medium text-white placeholder-slate-500">
+                <button onclick="responder()" class="p-4 bg-blue-600 rounded-full active:scale-90 transition-transform shadow-lg shadow-blue-600/30 hover:bg-blue-500">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M13 5l7 7-7 7M5 5l7 7-7 7"/></svg>
                 </button>
             </div>
         </div>
     </main>
 
     <script>
+        // --- SMART ENGINE (IA LOCAL OTIMIZADA & UNIVERSAL) ---
+        const SmartEngine = {
+            process: (input, lang) => {
+                const text = input.toLowerCase().trim();
+                
+                // Padrões de Resposta Inteligente
+                const patterns = {
+                    'pt-PT': [
+                        { keys: ['fome', 'comer', 'almoço', 'jantar', 'comida'], response: "Entendi que você precisa se alimentar. Vamos providenciar algo gostoso para comer agora." },
+                        { keys: ['sede', 'beber', 'água', 'suco', 'chá'], response: "Percebo que você está com sede. Vou buscar uma bebida fresca para hidratar você." },
+                        { keys: ['dor', 'dói', 'machucado', 'desconforto'], response: "Sinto muito que esteja com dor. Por favor, mostre onde dói para que eu possa ajudar a aliviar." },
+                        { keys: ['banho', 'lavar', 'limpar', 'sujo'], response: "Compreendo, você quer tomar um banho para se sentir renovado. Vamos preparar tudo com cuidado." },
+                        { keys: ['sono', 'dormir', 'cansado', 'cama'], response: "Parece que o dia foi longo. Está na hora de descansar. Vou ajudar você a se deitar confortavelmente." },
+                        { keys: ['banheiro', 'sanita', 'xixi', 'cocô'], response: "Entendido, você precisa ir ao banheiro. Vamos lá com calma, estou aqui para apoiar." },
+                        { keys: ['frio', 'gelado', 'cobertor'], response: "Se você está com frio, vou buscar um cobertor ou agasalho para aquecer você imediatamente." },
+                        { keys: ['calor', 'quente', 'suando'], response: "Está calor, não é? Vamos abrir uma janela ou ligar a ventilação para você se sentir melhor." },
+                        { keys: ['amor', 'gosto', 'amo', 'carinho'], response: "Que mensagem linda. O carinho é recíproco e é muito bom ter essa conexão com você." },
+                        { keys: ['triste', 'chora', 'choro'], response: "Estou vendo que você está triste. Estou aqui ao seu lado. Se quiser, ficamos em silêncio juntos." },
+                        { keys: ['feliz', 'bom', 'alegria'], response: "Que maravilha saber que você está feliz! Sua alegria ilumina o nosso ambiente." },
+                        { keys: ['ajuda', 'socorro', 'preciso'], response: "Estou atento. Diga-me exatamente o que precisa, estou inteiramente à sua disposição." },
+                        { keys: ['sim', 'quero', 'pode'], response: "Certo, entendi sua confirmação. Vamos prosseguir com isso." },
+                        { keys: ['não', 'pare', 'nunca'], response: "Compreendido. Vamos parar ou mudar o que estamos fazendo para respeitar sua vontade." }
+                    ],
+                    'en-US': [
+                        { keys: ['hungry', 'eat', 'food', 'lunch', 'dinner'], response: "I understand you need to eat. Let's get something delicious for you right now." },
+                        { keys: ['thirsty', 'drink', 'water', 'juice'], response: "I see you are thirsty. I will get a fresh drink to hydrate you." },
+                        { keys: ['pain', 'hurt', 'ache'], response: "I am sorry you are in pain. Please show me where it hurts so I can help." },
+                        { keys: ['bath', 'shower', 'clean', 'wash'], response: "I understand, you want to take a bath to feel refreshed. Let's prepare everything carefully." },
+                        { keys: ['sleep', 'tired', 'bed'], response: "It seems it's been a long day. It is time to rest. I will help you lie down comfortably." },
+                        { keys: ['help', 'aid'], response: "I am attentive. Tell me exactly what you need, I am entirely at your disposal." },
+                        { keys: ['love', 'like'], response: "What a beautiful message. The affection is mutual and it is great to have this connection with you." }
+                    ],
+                    'fr-FR': [
+                        { keys: ['faim', 'manger', 'repas'], response: "Je comprends que vous avez besoin de manger. Préparons quelque chose de délicieux maintenant." },
+                        { keys: ['soif', 'boire', 'eau'], response: "Je vois que vous avez soif. Je vais chercher une boisson fraîche pour vous hydrater." },
+                        { keys: ['douleur', 'mal'], response: "Je suis désolé que vous souffriez. Montrez-moi où ça fait mal pour que je puisse aider." },
+                        { keys: ['bain', 'laver', 'douche'], response: "Je comprends, vous voulez prendre un bain. Préparons tout avec soin." },
+                        { keys: ['dormir', 'fatigué', 'lit'], response: "La journée a été longue. Il est temps de se reposer. Je vais vous aider à vous installer confortablement." },
+                        { keys: ['aide', 'secours'], response: "Je suis attentif. Dites-moi exactement ce dont vous avez besoin, je suis entièrement à votre disposition." },
+                        { keys: ['amour', 'aime'], response: "Quel beau message. L'affection est réciproque et c'est bon d'avoir cette connexion avec vous." }
+                    ],
+                    'zh-CN': [
+                        { keys: ['饿', '吃', '饭'], response: "我明白你需要吃东西。让我们现在就去准备一些美味的食物。" },
+                        { keys: ['渴', '喝', '水'], response: "我看你渴了。我去拿一杯新鲜的饮料给你补充水分。" },
+                        { keys: ['痛', '疼'], response: "我很遗憾你感到疼痛。请告诉我哪里痛，以便我能提供帮助。" },
+                        { keys: ['洗澡', '洗'], response: "我明白，你想洗个澡让自己焕然一新。让我们精心准备一切。" },
+                        { keys: ['睡', '累', '床'], response: "看来这是漫长的一天。是时候休息了。我会帮你舒服地躺下。" },
+                        { keys: ['帮助', '救命'], response: "我在听。请确切告诉我你需要什么，我完全听从你的吩咐。" },
+                        { keys: ['爱', '喜欢'], response: "多么美好的信息。这份感情是相互的，很高兴能与你有这样的联系。" }
+                    ]
+                };
+
+                const langPatterns = patterns[lang] || patterns['pt-PT'];
+                
+                // 1. Busca por correspondência exata de palavra-chave
+                for (let pattern of langPatterns) {
+                    if (pattern.keys.some(k => text.includes(k))) {
+                        return pattern.response;
+                    }
+                }
+
+                // 2. Resposta de Acolhimento Universal (Fallback Inteligente)
+                // Se não entender o contexto específico, acolhe a intenção de comunicação.
+                const fallbacks = {
+                    'pt-PT': `Entendi sua mensagem: "${input}". Sinto a emoção nas suas palavras e estou aqui para apoiar você em tudo o que precisar.`,
+                    'en-US': `I received your message: "${input}". I feel the emotion in your words and I am here to support you in whatever you need.`,
+                    'fr-FR': `J'ai bien reçu votre message : "${input}". Je ressens l'émotion dans vos mots et je suis là pour vous soutenir.`,
+                    'zh-CN': `我收到了你的信息：“${input}”。我能感受到你话语中的情感，我会在这里支持你的一切需求。`
+                };
+
+                return fallbacks[lang] || fallbacks['pt-PT'];
+            }
+        };
+
+        // --- Variáveis de Estado ---
         let currentLang = 'pt-PT';
         let modo = 'user';
         let apiKey = '';
@@ -203,28 +292,29 @@
                 btnCare: 'ENTRAR COMO CUIDADOR',
                 gateQuote: '"Nenhuma voz deve ser silenciada."',
                 loginTitle: 'Acesso Restrito',
-                emailPlaceholder: 'Email',
-                passPlaceholder: 'Palavra-passe',
                 btnLogin: 'ACESSAR PORTAL',
                 btnCancel: 'CANCELAR',
                 menuLabel: 'Governança e Configurações',
                 govTitle: 'Sobre a Plataforma',
-                govMessage: 'A Tecla é um ecossistema dedicado a devolver a autonomia de comunicação a quem a perdeu. Através de tecnologia assistiva e IA, garantimos que a dignidade humana e a expressão individual sejam preservadas. Este projeto é gerido sob rigorosos princípios de transparência e impacto social.',
+                govMessage: 'A Tecla, criada por Dala de Carvalho, nasce da convicção de que comunicar é um direito fundamental. Este ecossistema devolve a autonomia a quem a perdeu, garantindo que a dignidade humana e a expressão individual sejam preservadas através de tecnologia, proteção e amor.',
                 langLabel: 'Idioma do Sistema',
                 donateLabel: 'Apoie a Tecla 💝',
-                donateText: 'Sua doação ajuda a expandir nossa IA e manter a plataforma gratuita para quem mais precisa.',
+                donateText: 'Sua doação ajuda a expandir nossa IA e manter a plataforma gratuita.',
                 dashLabel: 'Dashboard Cuidador',
-                aiStatus: 'Modo IA Ativo',
+                aiStatus: 'IA Ativa',
                 dashTitle: 'Monitoramento de Atividade',
                 statTotalLabel: 'Total Hoje',
                 statMoodLabel: 'Humor Médio',
                 statMoodValue: 'Estável',
                 aiConfig: 'Configurações de IA',
-                apiKeyPlaceholder: 'Chave Gemini API',
+                aiInfo: '* A IA Local está ativa por padrão. Use a API apenas para modelos externos avançados.',
+                apiKeyPlaceholder: 'Chave Gemini API (Opcional)',
                 btnSync: 'Sincronizar Canal',
-                welcome: 'Conexão estabelecida. Como posso ajudar hoje?',
+                welcome: 'Conexão estabelecida. Sinto sua presença. Como posso ajudar hoje?',
                 placeholder: 'Escreva ou use o microfone...',
-                icons: { comer: 'Comer', dor: 'Dor', ajuda: 'Ajuda', banho: 'Banho', amor: 'Amor', dormir: 'Dormir' }
+                emailHolder: 'Email',
+                passHolder: 'Palavra-passe',
+                icons: { comer: 'Fome', dor: 'Dor', ajuda: 'Ajuda', banho: 'Banho', amor: 'Amor', dormir: 'Sono' }
             },
             'en-US': {
                 gateSubtitle: 'Human & AI Connection',
@@ -232,28 +322,29 @@
                 btnCare: 'ENTER AS CAREGIVER',
                 gateQuote: '"No voice should be silenced."',
                 loginTitle: 'Restricted Access',
-                emailPlaceholder: 'Email',
-                passPlaceholder: 'Password',
                 btnLogin: 'ACCESS PORTAL',
                 btnCancel: 'CANCEL',
                 menuLabel: 'Governance & Settings',
                 govTitle: 'About the Platform',
-                govMessage: 'Tecla is an ecosystem dedicated to restoring communication autonomy to those who have lost it. Through assistive technology and AI, we ensure that human dignity and individual expression are preserved. This project is managed under strict principles of transparency and social impact.',
+                govMessage: 'Tecla, created by Dala de Carvalho, is born from the conviction that communication is a fundamental right. This ecosystem restores autonomy to those who have lost it, ensuring human dignity and individual expression are preserved through technology, protection, and love.',
                 langLabel: 'System Language',
                 donateLabel: 'Support Tecla 💝',
-                donateText: 'Your donation helps expand our AI and keep the platform free for those who need it most.',
+                donateText: 'Your donation helps expand our AI and keep the platform free.',
                 dashLabel: 'Caregiver Dashboard',
-                aiStatus: 'AI Mode Active',
+                aiStatus: 'AI Active',
                 dashTitle: 'Activity Monitoring',
                 statTotalLabel: 'Total Today',
                 statMoodLabel: 'Average Mood',
                 statMoodValue: 'Stable',
                 aiConfig: 'AI Settings',
-                apiKeyPlaceholder: 'Gemini API Key',
+                aiInfo: '* Local AI is active by default. Use API only for advanced external models.',
+                apiKeyPlaceholder: 'Gemini API Key (Optional)',
                 btnSync: 'Sync Channel',
-                welcome: 'Connection established. How can I help today?',
+                welcome: 'Connection established. I feel your presence. How can I help today?',
                 placeholder: 'Type or use microphone...',
-                icons: { comer: 'Eat', dor: 'Pain', ajuda: 'Help', banho: 'Bath', amor: 'Love', dormir: 'Sleep' }
+                emailHolder: 'Email',
+                passHolder: 'Password',
+                icons: { comer: 'Hungry', dor: 'Pain', ajuda: 'Help', banho: 'Bath', amor: 'Love', dormir: 'Sleep' }
             },
             'fr-FR': {
                 gateSubtitle: 'Connexion Humaine & IA',
@@ -261,28 +352,29 @@
                 btnCare: 'ENTRER COMME AIDANT',
                 gateQuote: '"Aucune voix ne doit être réduite au silence."',
                 loginTitle: 'Accès Restreint',
-                emailPlaceholder: 'E-mail',
-                passPlaceholder: 'Mot de passe',
                 btnLogin: 'ACCÉDER AU PORTAIL',
                 btnCancel: 'ANNULER',
                 menuLabel: 'Gouvernance et Paramètres',
                 govTitle: 'À propos de la plateforme',
-                govMessage: 'Tecla est un écosystème dédié à redonner l\'autonomie de communication à ceux qui l\'ont perdue. Grâce aux technologies d\'assistance et à l\'IA, nous veillons à ce que la dignité humaine et l\'expression individuelle soient préservées. Ce projet est géré selon des principes stricts de transparence et d\'impact social.',
+                govMessage: 'Tecla, créée par Dala de Carvalho, naît de la conviction que communiquer est un droit fondamental. Cet écosystème redonne l\'autonomie à ceux qui l\'ont perdue, garantissant que la dignité humaine et l\'expression individuelle soient préservées grâce à la technologie, à la protection et à l\'amour.',
                 langLabel: 'Langue du Système',
                 donateLabel: 'Soutenir Tecla 💝',
-                donateText: 'Votre don aide à développer notre IA et à maintenir la plateforme gratuite pour ceux qui en ont le plus besoin.',
-                dashLabel: 'Tableau de bord de l\'aidant',
-                aiStatus: 'Mode IA Actif',
+                donateText: 'Votre don aide à développer notre IA et à maintenir la plateforme gratuite.',
+                dashLabel: 'Tableau de bord',
+                aiStatus: 'IA Active',
                 dashTitle: 'Suivi d\'activité',
                 statTotalLabel: 'Total Aujourd\'hui',
                 statMoodLabel: 'Humeur Moyenne',
                 statMoodValue: 'Stable',
                 aiConfig: 'Paramètres d\'IA',
-                apiKeyPlaceholder: 'Clé API Gemini',
+                aiInfo: '* L\'IA locale est active par défaut. Utilisez l\'API uniquement pour les modèles avancés.',
+                apiKeyPlaceholder: 'Clé API Gemini (Optionnel)',
                 btnSync: 'Synchroniser le canal',
-                welcome: 'Connexion établie. Comment puis-je vous aider?',
+                welcome: 'Connexion établie. Je sens votre présence. Comment aider?',
                 placeholder: 'Écrivez ou utilisez le micro...',
-                icons: { comer: 'Manger', dor: 'Douleur', ajuda: 'Aide', banho: 'Bain', amor: 'Amour', dormir: 'Dormir' }
+                emailHolder: 'E-mail',
+                passHolder: 'Mot de passe',
+                icons: { comer: 'Faim', dor: 'Douleur', ajuda: 'Aide', banho: 'Bain', amor: 'Amour', dormir: 'Dormir' }
             },
             'zh-CN': {
                 gateSubtitle: '人类与人工智能连接',
@@ -290,28 +382,29 @@
                 btnCare: '以护理人员身份进入',
                 gateQuote: '“任何声音都不应该被沉默。”',
                 loginTitle: '受限访问',
-                emailPlaceholder: '电子邮件',
-                passPlaceholder: '密码',
                 btnLogin: '进入门户',
                 btnCancel: '取消',
                 menuLabel: '治理与设置',
                 govTitle: '关于平台',
-                govMessage: 'Tecla 是一个致力于为失去沟通能力的人恢复沟通自主权的生态系统。通过辅助技术和人工智能，我们确保人类尊严和个人表达得到维护。该项目根据透明度和社会影响的严格原则进行管理。',
+                govMessage: 'Tecla 由 Dala de Carvalho 创立，源于沟通是一项基本权利的信念。该生态系统通过技术、保护和爱，为失去沟通能力的人恢复自主权，确保人类尊严和个人表达得到维护。',
                 langLabel: '系统语言',
                 donateLabel: '支持 Tecla 💝',
-                donateText: '您的捐款有助于扩展我们的人工智能，并为最需要的人保持平台免费。',
+                donateText: '您的捐款有助于扩展我们的人工智能。',
                 dashLabel: '护理人员仪表板',
-                aiStatus: '人工智能模式激活',
+                aiStatus: '人工智能活跃',
                 dashTitle: '活动监测',
                 statTotalLabel: '今日总计',
                 statMoodLabel: '平均情绪',
                 statMoodValue: '稳定',
                 aiConfig: '人工智能设置',
-                apiKeyPlaceholder: 'Gemini API 密钥',
+                aiInfo: '* 本地人工智能默认处于活动状态。仅将 API 用于高级外部模型。',
+                apiKeyPlaceholder: 'Gemini API 密钥 (可选)',
                 btnSync: '同步频道',
-                welcome: '连接已建立。今天我能如何帮您？',
+                welcome: '连接已建立。我感觉到你的存在。怎么帮你？',
                 placeholder: '输入或使用麦克风...',
-                icons: { comer: '吃', dor: '疼痛', ajuda: '帮助', banho: '洗澡', amor: '爱', dormir: '睡觉' }
+                emailHolder: '电子邮件',
+                passHolder: '密码',
+                icons: { comer: '饿', dor: '痛', ajuda: '帮助', banho: '洗澡', amor: '爱', dormir: '睡觉' }
             }
         };
 
@@ -320,76 +413,64 @@
             { key: 'banho', i: '🚿' }, { key: 'amor', i: '❤️' }, { key: 'dormir', i: '😴' }
         ];
 
-        // --- Tradução em Tempo Real ---
+        // --- Funções de UI e Lógica ---
+
         function setLanguage(lang) {
             currentLang = lang;
             const t = translations[lang];
             
-            // Portão e Login
-            document.getElementById('gateSubtitle').innerText = t.gateSubtitle;
-            document.getElementById('btnUserLogin').innerText = t.btnUser;
-            document.getElementById('btnCareLogin').innerText = t.btnCare;
-            document.getElementById('gateQuote').innerText = t.gateQuote;
-            document.getElementById('loginTitle').innerText = t.loginTitle;
-            document.getElementById('loginEmail').placeholder = t.emailPlaceholder;
-            document.getElementById('loginPass').placeholder = t.passPlaceholder;
-            document.getElementById('btnLoginAction').innerText = t.btnLogin;
-            document.getElementById('btnCancelLogin').innerText = t.btnCancel;
+            // Atualiza textos estáticos
+            const ids = ['gateSubtitle', 'btnUserLogin', 'btnCareLogin', 'gateQuote', 'loginTitle', 'btnLoginAction', 'btnCancelLogin', 'menuLabel', 'govTitle', 'govMessage', 'langLabel', 'donateLabel', 'donateText', 'dashLabel', 'aiStatusText', 'dashTitle', 'statLabelTotal', 'statLabelMood', 'statMood', 'aiConfigLabel', 'aiInfoText', 'btnSync'];
+            const keys = ['gateSubtitle', 'btnUser', 'btnCare', 'gateQuote', 'loginTitle', 'btnLogin', 'btnCancel', 'menuLabel', 'govTitle', 'govMessage', 'langLabel', 'donateLabel', 'donateText', 'dashLabel', 'aiStatus', 'dashTitle', 'statTotalLabel', 'statMoodLabel', 'statMoodValue', 'aiConfig', 'aiInfo', 'btnSync'];
+            
+            ids.forEach((id, i) => {
+                const el = document.getElementById(id);
+                if(el) el.innerText = t[keys[i]];
+            });
 
-            // Menu Lateral
-            document.getElementById('menuLabel').innerText = t.menuLabel;
-            document.getElementById('govTitle').innerText = t.govTitle;
-            document.getElementById('govMessage').innerText = t.govMessage;
-            document.getElementById('langLabel').innerText = t.langLabel;
-            document.getElementById('donateLabel').innerText = t.donateLabel;
-            document.getElementById('donateText').innerText = t.donateText;
-            document.getElementById('dashLabel').innerText = t.dashLabel;
-
-            // Header e Dashboard
-            document.getElementById('aiStatusText').innerText = t.aiStatus;
-            document.getElementById('dashTitle').innerText = t.dashTitle;
-            document.getElementById('statLabelTotal').innerText = t.statTotalLabel;
-            document.getElementById('statLabelMood').innerText = t.statMoodLabel;
-            document.getElementById('statMood').innerText = t.statMoodValue;
-            document.getElementById('aiConfigLabel').innerText = t.aiConfig;
+            document.getElementById('loginEmail').placeholder = t.emailHolder;
+            document.getElementById('loginPass').placeholder = t.passHolder;
             document.getElementById('api_key_input').placeholder = t.apiKeyPlaceholder;
-            document.getElementById('btnSync').innerText = t.btnSync;
-
-            // Chat Input
             document.getElementById('entrada').placeholder = t.placeholder;
 
             renderIcons();
             if (recognition) recognition.lang = lang;
         }
 
-        // --- TTS Logic (Voz de Resposta) ---
+        // Sintetizador de Voz (Prioriza API, fallback para Browser)
         async function speak(text) {
-            if (!apiKey) {
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = currentLang;
-                window.speechSynthesis.speak(utterance);
-                return;
+            // Se tiver chave e internet, tenta API de alta qualidade
+            if (apiKey && navigator.onLine) {
+                try {
+                    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [{ parts: [{ text: text }] }],
+                            generationConfig: {
+                                responseModalities: ["AUDIO"],
+                                speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Puck" } } }
+                            }
+                        })
+                    });
+                    const data = await response.json();
+                    if(data.candidates && data.candidates[0].content) {
+                        const audioData = data.candidates[0].content.parts[0].inlineData.data;
+                        playAudio(audioData);
+                        return;
+                    }
+                } catch (err) {
+                    console.warn("Falha na voz API, usando fallback local.");
+                }
             }
-
-            try {
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: text }] }],
-                        generationConfig: {
-                            responseModalities: ["AUDIO"],
-                            speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Puck" } } }
-                        }
-                    })
-                });
-
-                const data = await response.json();
-                const audioData = data.candidates[0].content.parts[0].inlineData.data;
-                playAudio(audioData);
-            } catch (err) {
-                console.error("Erro voz:", err);
-            }
+            
+            // Fallback: Web Speech API (Voz do Navegador)
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = currentLang;
+            utterance.rate = 0.9; // Um pouco mais lento para ser acolhedor
+            utterance.pitch = 1.1; // Tom levemente mais amigável
+            window.speechSynthesis.speak(utterance);
         }
 
         function playAudio(base64Data) {
@@ -419,7 +500,6 @@
             return buffer;
         }
 
-        // --- Reconhecimento de Fala ---
         function setupRecognition() {
             if (!('webkitSpeechRecognition' in window)) return;
             recognition = new webkitSpeechRecognition();
@@ -440,8 +520,7 @@
         }
 
         function updateMicUI() {
-            const btn = document.getElementById('micBtn');
-            btn.classList.toggle('listening', isListening);
+            document.getElementById('micBtn').classList.toggle('listening', isListening);
         }
 
         function showLogin(type) { document.getElementById('loginModal').classList.remove('hidden'); }
@@ -450,10 +529,17 @@
         function enableVoiceAndStartApp() {
             document.getElementById('loginModal').classList.add('hidden');
             document.getElementById('voiceGate').classList.add('hidden');
+            
+            // Inicia audio context com gesto do usuário
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            audioCtx.resume();
+
             setupRecognition();
             initChart();
             carregarEstado();
             renderIcons();
+            
+            // Boas vindas iniciais
             const welcomeMsg = translations[currentLang].welcome;
             addMsg(welcomeMsg, 'bot');
             speak(welcomeMsg);
@@ -465,14 +551,13 @@
             grid.innerHTML = '';
             iconsData.forEach(icon => {
                 const btn = document.createElement('button');
-                btn.className = "glass p-4 rounded-3xl flex flex-col items-center active:scale-95 transition-transform";
+                btn.className = "glass p-3 rounded-2xl flex flex-col items-center active:scale-95 transition-all hover:bg-white/10 border border-white/5 shadow-lg";
                 btn.onclick = () => { 
-                    const txt = t.icons[icon.key];
-                    document.getElementById('entrada').value = txt; 
-                    speak(txt); 
+                    const rawText = t.icons[icon.key];
+                    document.getElementById('entrada').value = rawText; 
                     responder(); 
                 };
-                btn.innerHTML = `<span class="text-2xl">${icon.i}</span><span class="text-[8px] font-black uppercase mt-1 text-slate-500">${t.icons[icon.key]}</span>`;
+                btn.innerHTML = `<span class="text-3xl mb-1 filter drop-shadow-md">${icon.i}</span><span class="text-[9px] font-black uppercase text-blue-200 tracking-wider">${t.icons[icon.key]}</span>`;
                 grid.appendChild(btn);
             });
         }
@@ -480,8 +565,17 @@
         function addMsg(txt, type) {
             const display = document.getElementById('chatDisplay');
             const div = document.createElement('div');
-            div.className = `message-anim p-4 text-xs max-w-[85%] ${type === 'user' ? 'bg-blue-600 text-white rounded-[1.5rem] ml-auto' : 'glass text-white rounded-[1.5rem] mr-auto border-white/5'}`;
-            div.innerText = txt;
+            // Estilos distintos para usuário e bot
+            const styles = type === 'user' 
+                ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-br-none ml-auto shadow-lg shadow-blue-900/40' 
+                : 'glass text-slate-100 rounded-bl-none mr-auto border-white/10 shadow-lg';
+            
+            div.className = `message-anim px-5 py-3 text-sm rounded-[1.5rem] max-w-[85%] leading-relaxed ${styles}`;
+            
+            // Ícone pequeno para identificar bot
+            const icon = type === 'bot' ? '<span class="mr-2 text-blue-400 text-xs">●</span>' : '';
+            div.innerHTML = `${icon}${txt}`;
+            
             display.appendChild(div);
             display.scrollTop = display.scrollHeight;
             if(type === 'user') { interactionsCount++; updateStats(); }
@@ -494,25 +588,44 @@
             
             input.value = '';
             addMsg(txt, 'user');
-            speak(txt); 
+            
+            // Mostra indicador de processamento
+            const typingIndicator = document.createElement('div');
+            typingIndicator.id = 'typing';
+            typingIndicator.className = 'glass p-3 rounded-[1.5rem] mr-auto w-12 flex justify-center space-x-1 items-center animate-pulse';
+            typingIndicator.innerHTML = '<div class="w-1.5 h-1.5 bg-white rounded-full"></div><div class="w-1.5 h-1.5 bg-white rounded-full"></div>';
+            document.getElementById('chatDisplay').appendChild(typingIndicator);
+            document.getElementById('chatDisplay').scrollTop = document.getElementById('chatDisplay').scrollHeight;
 
-            if(apiKey) {
+            let reply = "";
+
+            // LÓGICA HÍBRIDA: Tenta API se disponível, senão usa SmartEngine Local
+            if(apiKey && navigator.onLine) {
                 try {
                     const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
                         method: 'POST',
                         headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({ contents: [{ parts: [{ text: `Act as Tecla AI. Very brief empathetic response in ${currentLang}: ${txt}` }] }] })
+                        body: JSON.stringify({ contents: [{ parts: [{ text: `Aja como Tecla, uma IA empática e protetora criada por Dala de Carvalho. Responda brevemente e com acolhimento total em ${currentLang} para: "${txt}". Não invente fatos, foque na emoção.` }] }] })
                     });
                     const data = await res.json();
-                    const reply = data.candidates[0].content.parts[0].text;
-                    addMsg(reply, 'bot');
-                    speak(reply); 
+                    reply = data.candidates[0].content.parts[0].text;
                 } catch (e) {
-                    addMsg("...", 'bot');
+                    console.log("Erro API, fallback local.");
+                    reply = SmartEngine.process(txt, currentLang);
                 }
             } else {
-                setTimeout(() => addMsg("...", 'bot'), 600);
+                // MODO OFFLINE / SEM CHAVE (Padrão Otimizado)
+                // Simula um delay natural de pensamento
+                await new Promise(r => setTimeout(r, 600));
+                reply = SmartEngine.process(txt, currentLang);
             }
+
+            // Remove indicador de typing
+            const typer = document.getElementById('typing');
+            if(typer) typer.remove();
+
+            addMsg(reply, 'bot');
+            speak(reply); // Fala a resposta completa e processada
         }
 
         function initChart() {
@@ -521,9 +634,30 @@
                 type: 'line',
                 data: {
                     labels: ['0h', '4h', '8h', '12h', '16h', '20h'],
-                    datasets: [{ label: 'Interações', data: [0, 0, 0, 0, 0, 0], borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.1)', fill: true, tension: 0.4, borderWidth: 3, pointRadius: 0 }]
+                    datasets: [{ 
+                        label: 'Interações', 
+                        data: [0, 0, 0, 0, 0, 0], 
+                        borderColor: '#60a5fa', 
+                        backgroundColor: (context) => {
+                            const ctx = context.chart.ctx;
+                            const gradient = ctx.createLinearGradient(0, 0, 0, 200);
+                            gradient.addColorStop(0, 'rgba(59, 130, 246, 0.4)');
+                            gradient.addColorStop(1, 'rgba(59, 130, 246, 0)');
+                            return gradient;
+                        },
+                        fill: true, 
+                        tension: 0.4, 
+                        borderWidth: 2, 
+                        pointRadius: 3,
+                        pointBackgroundColor: '#ffffff'
+                    }]
                 },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { display: false }, ticks: { display: false } }, x: { grid: { display: false }, ticks: { color: '#475569', font: { size: 9 } } } } }
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    plugins: { legend: { display: false } }, 
+                    scales: { y: { display: false }, x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 9 } } } } 
+                }
             });
         }
 
@@ -531,7 +665,8 @@
             if(chartInstance) {
                 const hour = new Date().getHours();
                 const idx = Math.floor(hour / 4);
-                chartInstance.data.datasets[0].data[idx] = (chartInstance.data.datasets[0].data[idx] || 0) + 1;
+                const currentVal = chartInstance.data.datasets[0].data[idx] || 0;
+                chartInstance.data.datasets[0].data[idx] = currentVal + 1;
                 chartInstance.update();
             }
             document.getElementById('statTotal').innerText = interactionsCount;
@@ -539,7 +674,7 @@
 
         function toggleMenu() { document.getElementById('sideMenu').classList.toggle('open'); document.getElementById('menuOverlay').classList.toggle('hidden'); }
         function toggleModo() { modo = (modo === 'user' ? 'admin' : 'user'); document.getElementById('dashboardSection').classList.toggle('hidden', modo === 'user'); document.getElementById('badgeModo').innerText = modo.toUpperCase(); }
-        function salvarEstado() { apiKey = document.getElementById('api_key_input').value; localStorage.setItem('tecla_v5_cfg', JSON.stringify({key: apiKey, lang: currentLang})); }
+        function salvarEstado() { apiKey = document.getElementById('api_key_input').value; localStorage.setItem('tecla_v5_cfg', JSON.stringify({key: apiKey, lang: currentLang})); alert('Configurações salvas!'); }
         function carregarEstado() {
             const cfg = JSON.parse(localStorage.getItem('tecla_v5_cfg') || '{}');
             if(cfg.key) { apiKey = cfg.key; document.getElementById('api_key_input').value = cfg.key; }
