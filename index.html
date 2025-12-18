@@ -3,54 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Tecla - Plataforma de Inteligência Emocional</title>
+    <title>Tecla - Plataforma Multilingue</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono&display=swap');
-
-        :root {
-            --primary-glow: rgba(59, 130, 246, 0.5);
-        }
 
         body {
             background-color: #0f172a;
             color: #f8fafc;
             font-family: 'Inter', sans-serif;
             overflow-x: hidden;
-            /* Previne scroll elástico em iOS */
             position: fixed;
             width: 100%;
             height: 100%;
         }
 
-        .user-mode {
-            background: radial-gradient(circle at top right, #1e293b, #0f172a);
-        }
-
-        .technical-mode {
-            background: #000;
-            font-family: 'JetBrains Mono', monospace;
-        }
-
         .glass {
-            background: rgba(30, 41, 59, 0.7);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+            background: rgba(30, 41, 59, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .pictograma {
-            transition: all 0.2s ease;
-            cursor: pointer;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            touch-action: manipulation;
-        }
-
-        .pictograma:active {
-            transform: scale(0.95);
-            background: rgba(59, 130, 246, 0.3);
-        }
+        .user-mode { background: radial-gradient(circle at top right, #1e293b, #0f172a); }
+        .technical-mode { background: #000; font-family: 'JetBrains Mono', monospace; }
 
         #sideMenu {
             transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -60,277 +37,286 @@
         }
         #sideMenu.open { transform: translateX(0); }
 
-        .mic-active {
-            animation: pulse-red 1.5s infinite;
-            color: #ef4444 !important;
+        .pictograma {
+            transition: all 0.2s ease;
+            cursor: pointer;
+            touch-action: manipulation;
         }
+        .pictograma:active { transform: scale(0.92); background: rgba(59, 130, 246, 0.3); }
 
+        .mic-active { animation: pulse-red 1.5s infinite; color: #ef4444 !important; }
         @keyframes pulse-red {
             0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
-            70% { transform: scale(1.1); box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
+            70% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
             100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
         }
 
-        /* Layout Adaptável para Mobile */
-        #mainContainer {
-            height: calc(100vh - 72px);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        #chatDisplay {
-            flex: 1;
-            overflow-y: auto;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        /* Scrollbar Invisível mas funcional */
-        ::-webkit-scrollbar { width: 0px; background: transparent; }
-
+        #chatDisplay { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
         .loading-dot { animation: blink 1.4s infinite both; }
-        .loading-dot:nth-child(2) { animation-delay: .2s; }
-        .loading-dot:nth-child(3) { animation-delay: .4s; }
         @keyframes blink { 0% { opacity: .2; } 20% { opacity: 1; } 100% { opacity: .2; } }
     </style>
 </head>
 <body class="fixed inset-0 overflow-hidden">
 
-    <!-- Voice Gate (Mobile Optimized) -->
+    <!-- Voice Gate -->
     <div id="voiceGate" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900 p-6">
-        <div class="text-center p-8 glass rounded-[2rem] max-w-sm border-blue-500/30 shadow-2xl">
-            <h1 class="text-3xl font-extrabold mb-4 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent italic tracking-tighter">TECLA</h1>
-            <p class="mb-8 text-slate-400 text-sm leading-relaxed font-light">Conexão bio-digital para suporte emocional e comunicação.</p>
-            <button onclick="enableVoiceAndStartApp()" class="w-full py-5 bg-blue-600 hover:bg-blue-500 rounded-2xl font-bold transition-all transform active:scale-95 shadow-xl shadow-blue-500/20 tracking-widest text-sm">
-                ATIVAR SISTEMA
+        <div class="text-center p-8 glass rounded-[2.5rem] max-w-sm border-blue-500/30 shadow-2xl">
+            <h1 class="text-3xl font-extrabold mb-2 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent italic tracking-tighter">TECLA</h1>
+            <p id="gate-sub" class="mb-8 text-slate-400 text-sm font-light">Conexão bio-digital para suporte emocional.</p>
+            <button onclick="enableVoiceAndStartApp()" class="w-full py-5 bg-blue-600 rounded-2xl font-bold transition-all active:scale-95 shadow-xl shadow-blue-500/20 text-sm tracking-widest">
+                INICIAR / START / COMMENCER
             </button>
         </div>
     </div>
 
-    <!-- Menu Overlay -->
     <div id="menuOverlay" onclick="toggleMenu()" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[50] hidden"></div>
     
     <!-- Side Menu -->
     <aside id="sideMenu" class="fixed top-0 right-0 h-full glass z-[60] p-6 flex flex-col border-l border-white/10 shadow-2xl">
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-lg font-bold tracking-widest text-blue-400 uppercase italic">Painel Tecla</h2>
-            <button onclick="toggleMenu()" class="p-3 hover:bg-white/10 rounded-full transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
+            <button onclick="toggleMenu()" class="p-2 hover:bg-white/10 rounded-full">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
         </div>
 
         <div class="space-y-6 flex-1 overflow-y-auto pr-1">
-            
-            <!-- Login -->
+            <!-- Portais Login -->
             <div class="space-y-2">
-                <label class="text-[9px] text-slate-500 uppercase font-bold tracking-[0.2em] block">Acesso</label>
-                <button onclick="iniciarLogin('cuidador')" class="w-full flex items-center space-x-3 p-4 glass rounded-2xl active:bg-blue-500/20">
+                <button onclick="iniciarLogin('cuidador')" class="w-full flex items-center space-x-3 p-4 glass rounded-2xl active:bg-blue-500/20 text-left">
                     <span class="text-xl">👩‍⚕️</span>
-                    <div class="text-left">
-                        <div class="text-xs font-bold">Portal Cuidador</div>
-                        <div class="text-[8px] text-slate-500 uppercase italic">Brevemente</div>
-                    </div>
+                    <div><div class="text-xs font-bold" id="label-login-c">Portal Cuidador</div><div class="text-[8px] opacity-50 uppercase">Offline</div></div>
                 </button>
-                <button onclick="iniciarLogin('usuario')" class="w-full flex items-center space-x-3 p-4 glass rounded-2xl active:bg-purple-500/20">
+                <button onclick="iniciarLogin('usuario')" class="w-full flex items-center space-x-3 p-4 glass rounded-2xl active:bg-purple-500/20 text-left">
                     <span class="text-xl">👤</span>
-                    <div class="text-left">
-                        <div class="text-xs font-bold">Meu Perfil</div>
-                        <div class="text-[8px] text-slate-500 uppercase italic">Brevemente</div>
-                    </div>
+                    <div><div class="text-xs font-bold" id="label-login-u">Meu Perfil</div><div class="text-[8px] opacity-50 uppercase">Offline</div></div>
                 </button>
             </div>
 
-            <!-- IA Personality -->
+            <!-- Personality -->
             <div>
-                <label class="text-[9px] text-slate-500 uppercase font-bold tracking-[0.2em] mb-3 block">Modo IA Conversacional</label>
+                <label class="text-[9px] text-slate-500 uppercase font-bold tracking-[0.2em] mb-2 block" id="label-personality">IA Personality</label>
                 <div class="grid grid-cols-2 gap-2">
-                    <button onclick="setIAPersonality('dala')" id="btn-ia-dala" class="p-3 glass rounded-xl text-[9px] font-bold">DALA (EMPÁTICA)</button>
-                    <button onclick="setIAPersonality('direct')" id="btn-ia-direct" class="p-3 glass rounded-xl text-[9px] font-bold">DIRETA (PRÁTICA)</button>
+                    <button onclick="setIAPersonality('dala')" id="btn-ia-dala" class="p-3 glass rounded-xl text-[9px] font-bold">DALA</button>
+                    <button onclick="setIAPersonality('direct')" id="btn-ia-direct" class="p-3 glass rounded-xl text-[9px] font-bold">DIRECT</button>
                 </div>
             </div>
 
-            <!-- Loja Tecla -->
+            <!-- Loja -->
             <div class="p-4 rounded-2xl bg-indigo-950/20 border border-indigo-500/20">
                 <div class="flex justify-between items-center mb-1">
                     <span class="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Loja Tecla</span>
-                    <span class="text-[8px] bg-indigo-500 text-white px-1.5 py-0.5 rounded">SOON</span>
+                    <span class="text-[8px] bg-indigo-500 text-white px-1 py-0.5 rounded">SOON</span>
                 </div>
-                <p class="text-[9px] text-slate-400 leading-tight">Equipamentos assistivos de última geração.</p>
             </div>
 
             <!-- Doações -->
             <div class="p-4 rounded-2xl bg-green-950/20 border border-green-500/20">
-                <label class="text-[9px] text-green-400 uppercase font-bold tracking-[0.2em] mb-2 block">Apoie o Projeto</label>
-                <p class="text-[9px] text-slate-400 mb-3 leading-tight">Ajude-nos a manter a Tecla acessível para todos.</p>
-                <button onclick="copyToClipboard('pix-key-placeholder')" class="w-full py-3 bg-green-600/20 border border-green-500/40 rounded-xl text-[9px] font-bold active:bg-green-600/40">
-                    CONTRIBUIR (PIX/PAYPAL)
-                </button>
+                <label class="text-[9px] text-green-400 uppercase font-bold mb-2 block" id="label-support">Suporte</label>
+                <button onclick="copyToClipboard('pix')" class="w-full py-3 bg-green-600/20 border border-green-500/40 rounded-xl text-[9px] font-bold active:bg-green-600/40">DONATE / APOIAR</button>
             </div>
 
-            <!-- Technical Dashboard -->
-            <div>
-                <label class="text-[9px] text-slate-500 uppercase font-bold tracking-[0.2em] mb-3 block">Sistema</label>
-                <button onclick="toggleModo(); toggleMenu();" class="w-full p-4 glass rounded-2xl flex items-center justify-between active:bg-white/10">
-                    <span class="text-xs font-semibold">⚙️ CONFIGS</span>
-                    <span id="badgeModo" class="text-[8px] bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded">USER</span>
-                </button>
-            </div>
+            <!-- System Toggle -->
+            <button onclick="toggleModo(); toggleMenu();" class="w-full p-4 glass rounded-2xl flex items-center justify-between active:bg-white/10">
+                <span class="text-xs font-semibold">⚙️ DASHBOARD</span>
+                <span id="badgeModo" class="text-[8px] bg-blue-500/20 text-blue-400 px-2 py-0.5 rounded">USER</span>
+            </button>
         </div>
     </aside>
 
     <div id="mainContentWrapper" class="hidden h-full flex flex-col">
         <header class="p-4 flex justify-between items-center glass z-40 border-b border-white/5">
             <div class="flex items-center space-x-2">
-                <div class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-                <span class="font-extrabold tracking-tighter text-lg italic">TECLA <span id="versaoDisplay" class="text-[8px] opacity-40 ml-1"></span></span>
+                <span class="font-extrabold tracking-tighter text-lg italic">TECLA</span>
+                <span id="versaoDisplay" class="text-[8px] opacity-40 uppercase"></span>
             </div>
-            <button onclick="toggleMenu()" class="p-2.5 glass rounded-xl active:scale-95 transition-transform">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-            </button>
+
+            <div class="flex items-center space-x-2">
+                <!-- Seletor de Idioma -->
+                <div class="flex glass p-1 rounded-xl">
+                    <button onclick="mudarIdioma('pt-PT')" id="lang-pt" class="px-2 py-1 text-[10px] rounded-lg">PT</button>
+                    <button onclick="mudarIdioma('en-US')" id="lang-en" class="px-2 py-1 text-[10px] rounded-lg">EN</button>
+                    <button onclick="mudarIdioma('fr-FR')" id="lang-fr" class="px-2 py-1 text-[10px] rounded-lg">FR</button>
+                </div>
+                
+                <button onclick="toggleMenu()" class="p-2.5 glass rounded-xl active:scale-90">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+                </button>
+            </div>
         </header>
 
-        <main id="mainContainer" class="p-4 user-mode">
-            
-            <!-- Technical Dashboard (Mobile optimized) -->
-            <section id="dashboardSection" class="hidden mb-6 space-y-4 animate-fade-in overflow-y-auto max-h-[60vh] p-1">
-                <div class="flex space-x-2 mb-2 overflow-x-auto pb-2 scrollbar-hide">
-                    <button onclick="abrirVersao('free')" class="barra px-4 py-2 text-[10px] font-bold rounded-lg border border-white/10">FREE</button>
-                    <button onclick="abrirVersao('intermediate')" class="barra px-4 py-2 text-[10px] font-bold rounded-lg border border-white/10">INT</button>
-                    <button onclick="abrirVersao('premium')" class="barra px-4 py-2 text-[10px] font-bold rounded-lg border border-white/10">PREMIUM</button>
-                </div>
-
+        <main id="mainContainer" class="p-4 user-mode overflow-hidden">
+            <!-- Technical Mode Section -->
+            <section id="dashboardSection" class="hidden mb-4 space-y-4 animate-fade-in overflow-y-auto max-h-[50vh] p-1">
                 <div class="glass p-4 rounded-2xl">
-                    <h3 class="text-blue-300 font-bold mb-3 uppercase text-[9px] tracking-widest">Cérebro LLM</h3>
-                    <div id="api_status" class="mb-3 text-[9px] font-mono"></div>
-                    <div class="space-y-3">
-                        <input type="text" id="api_endpoint_input" placeholder="Endpoint URL" class="w-full bg-black/40 border border-slate-700 rounded-xl p-3 text-[10px] outline-none font-mono">
-                        <input type="password" id="api_key_input" placeholder="API Key" class="w-full bg-black/40 border border-slate-700 rounded-xl p-3 text-[10px] outline-none font-mono">
-                        <button onclick="salvarEstado()" class="w-full py-3 bg-blue-600/20 border border-blue-500/40 rounded-xl text-[9px] font-black tracking-widest">GRAVAR</button>
-                    </div>
+                    <h3 class="text-blue-300 font-bold mb-3 text-[9px] tracking-widest uppercase">API Engine</h3>
+                    <input type="password" id="api_key_input" placeholder="Gemini API Key" class="w-full bg-black/40 border border-slate-700 rounded-xl p-3 text-[10px] outline-none mb-2">
+                    <button onclick="salvarEstado()" class="w-full py-3 bg-blue-600/20 border border-blue-500/40 rounded-xl text-[9px] font-black">SAVE CONFIG</button>
                 </div>
-
-                <div class="glass p-4 rounded-2xl h-[180px]">
-                    <canvas id="graficoAlertas"></canvas>
-                </div>
+                <div class="glass p-4 rounded-2xl h-[120px]"><canvas id="graficoAlertas"></canvas></div>
             </section>
 
-            <!-- Status de Respiração (Sobreposição) -->
-            <div id="respiracao" class="hidden absolute inset-x-4 top-20 z-30 p-8 glass rounded-[2.5rem] border-blue-500/30 text-center animate-pulse" data-running="false">
-                <div class="text-5xl mb-4">🧘</div>
-                <p id="respiracaoText" class="text-2xl font-light text-blue-100 italic"></p>
-            </div>
-
-            <!-- Insights da Dala -->
+            <!-- Dala Insight -->
             <div id="orientacaoDala" class="hidden mb-4 p-4 glass rounded-2xl border-green-500/30 bg-green-500/5 animate-fade-in">
                 <div class="flex items-center space-x-2 mb-1">
                     <span class="text-sm">✨</span>
-                    <h4 class="text-green-400 font-bold text-[9px] uppercase tracking-widest">Dala Insight</h4>
+                    <h4 class="text-green-400 font-bold text-[9px] uppercase tracking-widest">Insight</h4>
                 </div>
-                <div id="dala-insight-text" class="text-green-100/90 leading-tight italic text-sm"></div>
+                <div id="dala-insight-text" class="text-green-100/90 leading-tight italic text-xs"></div>
             </div>
 
-            <!-- Chat Display -->
+            <!-- Chat -->
             <div id="chatDisplay" class="space-y-4 mb-4 pr-1">
-                <div id="saida" class="text-center text-slate-500 italic text-xs py-10 px-6">
-                    Selecione um ícone ou use a voz para começar.
-                </div>
+                <div id="saida" class="text-center text-slate-500 italic text-[11px] py-10 px-6"></div>
             </div>
 
-            <!-- Pictogramas (Grid Adaptável) -->
-            <div id="pictogramasGrid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2 mb-4 shrink-0">
-                <!-- Dinâmico -->
-            </div>
+            <!-- Pictogramas -->
+            <div id="pictogramasGrid" class="grid grid-cols-3 sm:grid-cols-4 gap-2 mb-4 shrink-0"></div>
 
-            <!-- Input Zone -->
+            <!-- Input Area -->
             <div class="relative pt-2 pb-6 px-1 shrink-0">
-                <div class="relative flex items-center bg-slate-800 border border-slate-700 rounded-[1.5rem] p-1 shadow-2xl">
-                    <input type="text" id="entrada" 
-                           onkeypress="if(event.key === 'Enter') responder()"
-                           placeholder="..." 
-                           class="flex-1 bg-transparent border-none px-4 py-3 focus:outline-none text-white text-base font-light">
-                    <div class="flex items-center space-x-1 pr-1">
-                        <button id="micBtn" onclick="falar()" class="p-2.5 text-slate-400 active:text-blue-400 transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-                            </svg>
-                        </button>
-                        <button onclick="responder()" class="p-3 bg-blue-600 text-white rounded-full active:scale-90 transition-all shadow-lg">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
-                            </svg>
-                        </button>
+                <div class="relative flex items-center bg-slate-800/80 border border-slate-700 rounded-2xl p-1 shadow-2xl">
+                    <input type="text" id="entrada" onkeypress="if(event.key === 'Enter') responder()" placeholder="..." class="flex-1 bg-transparent border-none px-4 py-3 focus:outline-none text-white text-base font-light">
+                    <div class="flex items-center space-x-1">
+                        <button id="micBtn" onclick="falar()" class="p-2 text-slate-400 active:text-blue-400"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" /></svg></button>
+                        <button onclick="responder()" class="p-3 bg-blue-600 text-white rounded-full active:scale-90 shadow-lg"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M13 5l7 7-7 7M5 5l7 7-7 7" /></svg></button>
                     </div>
                 </div>
             </div>
         </main>
     </div>
 
-    <!-- Toast Feedback -->
-    <div id="feedbackToast" class="fixed top-24 left-1/2 -translate-x-1/2 px-5 py-2.5 glass rounded-full text-[10px] font-bold text-white z-[200] opacity-0 pointer-events-none transition-all duration-300 shadow-2xl border-white/20"></div>
+    <div id="feedbackToast" class="fixed top-24 left-1/2 -translate-x-1/2 px-5 py-2.5 glass rounded-full text-[10px] font-bold text-white z-[200] opacity-0 pointer-events-none transition-all duration-300 border-white/20"></div>
 
     <script>
         const i18n = {
             'pt-PT': {
+                gateSub: "Conexão bio-digital para suporte emocional.",
+                saida: "Escolha um pictograma ou fale para comunicar.",
+                placeholder: "Escrever...",
                 registo: 'Tecla registou: "{entrada}".',
-                respiracao: ["Inspire...", "Segure...", "Expire..."],
-                dalaAnalisando: 'Analisando...',
+                loginC: "Portal Cuidador",
+                loginU: "Meu Perfil",
+                personality: "Personalidade IA",
+                support: "Doações",
+                analisando: "Dala está a analisar...",
                 pictogramas: [
-                    { t: 'Comer', icon: '🍽️' },
-                    { t: 'Banheiro', icon: '🚻' },
-                    { t: 'Feliz', icon: '😊' },
-                    { t: 'Triste', icon: '😢' },
-                    { t: 'Dor', icon: '🤕' },
-                    { t: 'Ajuda', icon: '🆘' }
+                    { t: 'Comer', icon: '🍽️' }, { t: 'Banheiro', icon: '🚻' },
+                    { t: 'Feliz', icon: '😊' }, { t: 'Triste', icon: '😢' },
+                    { t: 'Dor', icon: '🤕' }, { t: 'Ajuda', icon: '🆘' }
+                ]
+            },
+            'en-US': {
+                gateSub: "Bio-digital connection for emotional support.",
+                saida: "Choose a pictogram or speak to communicate.",
+                placeholder: "Type here...",
+                registo: 'Tecla recorded: "{entrada}".',
+                loginC: "Caregiver Portal",
+                loginU: "My Profile",
+                personality: "AI Personality",
+                support: "Donations",
+                analisando: "Dala is analyzing...",
+                pictogramas: [
+                    { t: 'Eat', icon: '🍽️' }, { t: 'Bathroom', icon: '🚻' },
+                    { t: 'Happy', icon: '😊' }, { t: 'Sad', icon: '😢' },
+                    { t: 'Pain', icon: '🤕' }, { t: 'Help', icon: '🆘' }
+                ]
+            },
+            'fr-FR': {
+                gateSub: "Connexion bio-digitale pour soutien émotionnel.",
+                saida: "Choisissez um pictogramme ou parlez.",
+                placeholder: "Écrire...",
+                registo: 'Tecla a noté: "{entrada}".',
+                loginC: "Portail Soignant",
+                loginU: "Mon Profil",
+                personality: "Personnalité IA",
+                support: "Dons",
+                analisando: "Dala analyse...",
+                pictogramas: [
+                    { t: 'Manger', icon: '🍽️' }, { t: 'Toilettes', icon: '🚻' },
+                    { t: 'Heureux', icon: '😊' }, { t: 'Triste', icon: '😢' },
+                    { t: 'Douleur', icon: '🤕' }, { t: 'Aide', icon: '🆘' }
                 ]
             }
         };
 
-        let userProvidedApiKey = '';
-        let userProvidedEndpoint = '';
-        let dadosLogs = [];
-        let versaoAtual = 'premium';
-        let modoAtual = 'user';
-        let iaPersonality = 'dala';
-        let alertasConsecutivos = 0;
-        let chart = null;
+        let currentLang = 'pt-PT';
+        let userApiKey = '';
+        let logs = [];
+        let versao = 'premium';
+        let modo = 'user';
+        let personality = 'dala';
         let speechSynth = window.speechSynthesis;
-        let speechVoices = [];
         let recognition = null;
 
-        // --- AUTH PLACEHOLDER ---
+        function mudarIdioma(lang) {
+            currentLang = lang;
+            const content = i18n[lang];
+            
+            document.getElementById('gate-sub').innerText = content.gateSub;
+            document.getElementById('saida').innerText = content.saida;
+            document.getElementById('entrada').placeholder = content.placeholder;
+            document.getElementById('label-login-c').innerText = content.loginC;
+            document.getElementById('label-login-u').innerText = content.loginU;
+            document.getElementById('label-personality').innerText = content.personality;
+            document.getElementById('label-support').innerText = content.support;
+
+            // Update UI Active Language
+            ['pt', 'en', 'fr'].forEach(l => {
+                const btn = document.getElementById(`lang-${l}`);
+                btn.className = lang.startsWith(l) ? "px-2 py-1 text-[10px] rounded-lg bg-blue-600 text-white" : "px-2 py-1 text-[10px] rounded-lg";
+            });
+
+            if (recognition) recognition.lang = lang;
+            atualizarPictogramas();
+            salvarEstado();
+        }
+
+        function atualizarPictogramas() {
+            const grid = document.getElementById('pictogramasGrid');
+            grid.innerHTML = '';
+            i18n[currentLang].pictogramas.forEach(p => {
+                const div = document.createElement('div');
+                div.className = "pictograma glass p-3 rounded-2xl text-center flex flex-col items-center justify-center space-y-1 h-20 shadow-lg";
+                div.onclick = () => { document.getElementById('entrada').value = p.t; responder(); };
+                div.innerHTML = `<span class="text-2xl">${p.icon}</span><span class="text-[8px] font-bold uppercase">${p.t}</span>`;
+                grid.appendChild(div);
+            });
+        }
+
         function iniciarLogin(tipo) {
-            showToast(`Acesso ao ${tipo} disponível em breve.`);
-            /* Logica para Firebase Auth:
-               signInWithPopup(auth, provider).then(...)
-            */
+            showToast(currentLang === 'pt-PT' ? `Acesso ${tipo} em breve.` : `Access ${tipo} coming soon.`);
         }
 
         function showToast(msg) {
             const t = document.getElementById('feedbackToast');
             t.innerText = msg;
-            t.classList.remove('opacity-0', 'pointer-events-none');
+            t.classList.remove('opacity-0');
             t.classList.add('opacity-100', 'translate-y-2');
-            setTimeout(() => {
-                t.classList.add('opacity-0', 'pointer-events-none');
-                t.classList.remove('opacity-100', 'translate-y-2');
-            }, 2500);
+            setTimeout(() => { t.classList.add('opacity-0'); t.classList.remove('opacity-100', 'translate-y-2'); }, 2500);
         }
 
-        function copyToClipboard(text) {
-            // Simulação de cópia
-            showToast("Dados de contribuição copiados!");
+        function copyToClipboard(val) {
+            showToast(currentLang === 'pt-PT' ? "Copiado para transferência!" : "Copied to clipboard!");
         }
 
-        // Reconhecimento de Voz (Safari iOS fix)
-        function initRecognition() {
-            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-                recognition = new SpeechRecognition();
-                recognition.lang = 'pt-PT';
+        function toggleMenu() {
+            document.getElementById('sideMenu').classList.toggle('open');
+            document.getElementById('menuOverlay').classList.toggle('hidden');
+        }
+
+        function enableVoiceAndStartApp() {
+            document.getElementById('voiceGate').classList.add('hidden');
+            document.getElementById('mainContentWrapper').classList.remove('hidden');
+            initSpeech();
+            carregarEstado();
+            mudarIdioma(currentLang);
+            renderizarModo();
+        }
+
+        function initSpeech() {
+            if ('webkitSpeechRecognition' in window) {
+                recognition = new webkitSpeechRecognition();
                 recognition.onstart = () => document.getElementById('micBtn').classList.add('mic-active');
                 recognition.onresult = (e) => {
                     document.getElementById('entrada').value = e.results[0][0].transcript;
@@ -340,109 +326,56 @@
             }
         }
 
-        function enableVoiceAndStartApp() {
-            document.getElementById('voiceGate').classList.add('hidden');
-            document.getElementById('mainContentWrapper').classList.remove('hidden');
-            initRecognition();
-            carregarEstado();
-            renderizarModo();
-            atualizarPictogramas();
-            falarTexto("Pronta para ajudar.", "pt-PT");
-        }
-
-        function toggleMenu() {
-            document.getElementById('sideMenu').classList.toggle('open');
-            document.getElementById('menuOverlay').classList.toggle('hidden');
-        }
-
-        function setIAPersonality(p) {
-            iaPersonality = p;
-            document.getElementById('btn-ia-dala').className = p === 'dala' ? 'p-3 glass rounded-xl text-[9px] font-bold border-blue-500/50 text-blue-400' : 'p-3 glass rounded-xl text-[9px] font-bold';
-            document.getElementById('btn-ia-direct').className = p === 'direct' ? 'p-3 glass rounded-xl text-[9px] font-bold border-blue-500/50 text-blue-400' : 'p-3 glass rounded-xl text-[9px] font-bold';
-            salvarEstado();
-        }
-
-        function atualizarPictogramas() {
-            const grid = document.getElementById('pictogramasGrid');
-            grid.innerHTML = '';
-            i18n['pt-PT'].pictogramas.forEach(p => {
-                const div = document.createElement('div');
-                div.className = "pictograma glass p-3 rounded-2xl text-center flex flex-col items-center justify-center space-y-1 h-20";
-                div.onclick = () => { document.getElementById('entrada').value = p.t; responder(); };
-                div.innerHTML = `<span class="text-2xl">${p.icon}</span><span class="text-[8px] font-bold uppercase">${p.t}</span>`;
-                grid.appendChild(div);
-            });
-        }
-
-        function falarTexto(texto, idioma) {
-            if (!speechSynth) return;
-            speechSynth.cancel();
-            const utter = new SpeechSynthesisUtterance(texto);
-            utter.lang = idioma;
-            speechSynth.speak(utter);
-        }
-
         function falar() {
-            if (!recognition) return showToast("Voz não suportada neste browser.");
+            if (!recognition) return;
             try { recognition.start(); } catch (e) { recognition.stop(); }
         }
 
         async function responder() {
-            const ent = document.getElementById("entrada");
-            const txt = ent.value.trim();
+            const input = document.getElementById('entrada');
+            const txt = input.value.trim();
             if (!txt) return;
 
-            ent.value = '';
+            input.value = '';
             adicionarMensagem(txt, 'user');
             
             const mid = 'sys-' + Date.now();
             adicionarMensagem("...", 'system', mid);
 
-            const score = txt.toLowerCase().includes('dor') ? 5 : 0;
-            const resp = i18n['pt-PT'].registo.replace('{entrada}', txt);
-            document.getElementById(mid).innerText = resp;
-            falarTexto(resp, 'pt-PT');
+            const resposta = i18n[currentLang].registo.replace('{entrada}', txt);
+            document.getElementById(mid).innerText = resposta;
+            falarAudio(resposta);
 
-            if (score > 3 || versaoAtual === 'premium') await getDalaInsight(txt);
-            
-            dadosLogs.push({ frase: txt, score, timestamp: Date.now() });
-            if (modoAtual === 'technical') atualizarGrafico();
-            salvarEstado();
+            if (userApiKey) await getDalaInsight(txt);
+        }
+
+        function falarAudio(txt) {
+            const utter = new SpeechSynthesisUtterance(txt);
+            utter.lang = currentLang;
+            speechSynth.speak(utter);
         }
 
         async function getDalaInsight(txt) {
-            const idiv = document.getElementById('orientacaoDala');
             const itxt = document.getElementById('dala-insight-text');
-            idiv.classList.remove('hidden');
-            itxt.innerHTML = `Dala analisando <span class="loading-dot">.</span><span class="loading-dot">.</span>`;
-
-            if (!userProvidedApiKey) {
-                itxt.innerText = "Configura a API para receber insights.";
-                return;
-            }
+            document.getElementById('orientacaoDala').classList.remove('hidden');
+            itxt.innerHTML = `${i18n[currentLang].analisando} <span class="loading-dot">.</span>`;
 
             try {
-                const prompt = iaPersonality === 'dala' ? "Seja empática e breve." : "Seja direta e técnica.";
-                const res = await fetch(`${userProvidedEndpoint}?key=${userProvidedApiKey}`, {
+                const prompt = personality === 'dala' ? "Be empathetic and brief." : "Be direct.";
+                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${userApiKey}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: `${prompt} O utilizador disse: ${txt}` }] }]
-                    })
+                    body: JSON.stringify({ contents: [{ parts: [{ text: `${prompt} Lang: ${currentLang}. Input: ${txt}` }] }] })
                 });
                 const data = await res.json();
                 itxt.innerText = data.candidates[0].content.parts[0].text;
-            } catch (e) {
-                itxt.innerText = "Conexão offline.";
-            }
+            } catch (e) { itxt.innerText = "Offline."; }
         }
 
         function adicionarMensagem(txt, tipo, id) {
             const chat = document.getElementById("chatDisplay");
             const div = document.createElement('div');
-            div.className = tipo === 'user' 
-                ? 'p-3 rounded-2xl bg-blue-600/20 ml-auto max-w-[85%] text-right text-xs border border-white/5 animate-fade-in' 
-                : 'p-3 rounded-2xl bg-slate-800/80 mr-auto max-w-[85%] text-xs border border-white/5 animate-fade-in';
+            div.className = tipo === 'user' ? 'p-3 rounded-2xl bg-blue-600/20 ml-auto max-w-[85%] text-right text-xs border border-white/5' : 'p-3 rounded-2xl bg-slate-800/80 mr-auto max-w-[85%] text-xs border border-white/5';
             if (id) div.id = id;
             div.innerText = txt;
             chat.appendChild(div);
@@ -450,67 +383,34 @@
             document.getElementById('saida').style.display = 'none';
         }
 
-        function toggleModo() {
-            modoAtual = modoAtual === 'user' ? 'technical' : 'user';
-            renderizarModo();
-            salvarEstado();
-        }
+        function toggleModo() { modo = (modo === 'user' ? 'technical' : 'user'); renderizarModo(); salvarEstado(); }
 
         function renderizarModo() {
-            const mc = document.getElementById('mainContainer');
-            const ds = document.getElementById('dashboardSection');
-            mc.className = `p-4 transition-all ${modoAtual}-mode`;
-            document.getElementById('badgeModo').innerText = modoAtual.toUpperCase();
-            document.getElementById('versaoDisplay').innerText = versaoAtual.toUpperCase();
-            if (modoAtual === 'technical') {
-                ds.classList.remove('hidden');
-                if (!chart) initChart();
-            } else {
-                ds.classList.add('hidden');
-            }
+            document.getElementById('mainContainer').className = `p-4 flex flex-col h-full ${modo}-mode`;
+            document.getElementById('dashboardSection').classList.toggle('hidden', modo === 'user');
+            document.getElementById('badgeModo').innerText = modo.toUpperCase();
+            document.getElementById('versaoDisplay').innerText = versao;
         }
 
-        function abrirVersao(v) {
-            versaoAtual = v;
-            document.getElementById('versaoDisplay').innerText = v.toUpperCase();
-            salvarEstado();
+        function setIAPersonality(p) { 
+            personality = p; 
+            document.getElementById('btn-ia-dala').className = p === 'dala(empática' ? 'p-3 glass rounded-xl text-[9px] font-bold border-blue-500 text-blue-400' : 'p-3 glass rounded-xl text-[9px] font-bold';
+            document.getElementById('btn-ia-direct').className = p === 'direct(prática' ? 'p-3 glass rounded-xl text-[9px] font-bold border-blue-500 text-blue-400' : 'p-3 glass rounded-xl text-[9px] font-bold';
+            salvarEstado(); 
         }
 
         function salvarEstado() {
-            localStorage.setItem('tecla_cfg', JSON.stringify({
-                v: versaoAtual,
-                m: modoAtual,
-                p: iaPersonality,
-                k: document.getElementById('api_key_input').value,
-                e: document.getElementById('api_endpoint_input').value
-            }));
-            userProvidedApiKey = document.getElementById('api_key_input').value;
-            userProvidedEndpoint = document.getElementById('api_endpoint_input').value;
+            const key = document.getElementById('api_key_input').value;
+            userApiKey = key;
+            localStorage.setItem('tecla_save', JSON.stringify({ lang: currentLang, mode: modo, pers: personality, key: key }));
         }
 
         function carregarEstado() {
-            const cfg = JSON.parse(localStorage.getItem('tecla_cfg') || '{}');
-            if (cfg.v) versaoAtual = cfg.v;
-            if (cfg.m) modoAtual = cfg.m;
-            if (cfg.p) setIAPersonality(cfg.p);
-            if (cfg.k) { userProvidedApiKey = cfg.k; document.getElementById('api_key_input').value = cfg.k; }
-            if (cfg.e) { userProvidedEndpoint = cfg.e; document.getElementById('api_endpoint_input').value = cfg.e; }
-        }
-
-        function initChart() {
-            const ctx = document.getElementById('graficoAlertas').getContext('2d');
-            chart = new Chart(ctx, {
-                type: 'line',
-                data: { labels: [1,2,3,4,5], datasets: [{ data: [0,0,0,0,0], borderColor: '#3b82f6', tension: 0.4, borderWidth: 2, pointRadius: 0 }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: false }, scales: { y: { display: false }, x: { display: false } } }
-            });
-        }
-
-        function atualizarGrafico() {
-            if (chart) {
-                chart.data.datasets[0].data = dadosLogs.slice(-5).map(l => l.score);
-                chart.update();
-            }
+            const s = JSON.parse(localStorage.getItem('tecla_save') || '{}');
+            if (s.lang) mudarIdioma(s.lang);
+            if (s.mode) modo = s.mode;
+            if (s.pers) setIAPersonality(s.pers);
+            if (s.key) { userApiKey = s.key; document.getElementById('api_key_input').value = s.key; }
         }
     </script>
 </body>
